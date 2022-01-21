@@ -11,7 +11,7 @@ const EMBEDDED_HELP_MESSAGE = {
   embed: {
     color: 3447003,
     title: "Goerli ETH Bot",
-    description: "Welcome to the Goerli ETH Faucet.  See below for my commands.",
+    description: "Welcome to the GoErli ETH Faucet. Following are my commands:",
     fields: [{
         name: "+goerlieth <hex-data>",
         value: "`Sends up to 32 goerli ETH to the specified Hex. \n\nEx: +goerlieth <hex-data>`"

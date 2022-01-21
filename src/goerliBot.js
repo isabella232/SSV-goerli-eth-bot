@@ -36,9 +36,9 @@ const runGoerliFaucet = async (message, address, runCustomChecks) => {
   let embed = new Discord.MessageEmbed();
   const currentBalance = await etherscan.getBalance(address);
   if (currentBalance === null) {
-    console.log("Something went wrong while connecting to API to recieve balance.");
+    console.log("Something went wrong while connecting to API to receive balance.");
     if (message) {
-      embed.setDescription("**Error**\nSomething went wrong while getting address details please try again.").
+      embed.setDescription("**Error**\nSomething went wrong while getting hex details please try again.").
       setTimestamp().setColor(0xff1100);
       message.lineReply(embed)
     }
@@ -48,17 +48,17 @@ const runGoerliFaucet = async (message, address, runCustomChecks) => {
   const topUpAmount = maxDepositAmount - (currentBalance);
 
   if(topUpAmount <= 0 ) {
-    console.log("Address has max deposit amount.");
+    console.log("Given hex has max deposit amount.");
 
     if (message) {
-      embed.setDescription("**Operation Unsuccessful**\nAddress has max deposit amount.").
+      embed.setDescription("**Operation Unsuccessful**\nGiven Hex has max deposit amount.").
       setTimestamp().setColor(0xff1100);
       message.lineReply(embed);
     }
     return;
   }
 
-  console.log("address " + address + " is requesting " + topUpAmount/Math.pow(10,18) + " goerli eth.  Custom checks: " + runCustomChecks);
+  console.log("Hex " + address + " is requesting " + topUpAmount/Math.pow(10,18) + " goerli eth.  Custom checks: " + runCustomChecks);
 
   // Make sure the bot has enough Goerli ETH to send
   const faucetReady = await utils.faucetIsReady(process.env.FAUCET_ADDRESS, (topUpAmount + 1500000000000)/Math.pow(10,18));
