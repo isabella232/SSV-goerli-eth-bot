@@ -78,7 +78,7 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, receiverAddress, amo
           [Click here, to check the details at etherscan.io.]
           (https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
         message.lineReply(embed);
-        let dataToWrite = `${message.author.id},${new Date()},${receiverAddress},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
+        let dataToWrite = `${message.author.id},${new Date()},${receiverAddress},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
         fs.writeFile('txRecords/records.csv', dataToWrite, 'utf8', function (err) {
           if (err) {
             console.log('Some error occurred - file either not saved or corrupted file saved.');
