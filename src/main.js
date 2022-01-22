@@ -5,6 +5,7 @@ const goerliBot = require('./goerliBot.js');
 require('discord-reply');
 const bot = new Discord.Client();
 const web3 = require('web3');
+const db = require('./db')
 
 const COMMAND_PREFIX = '+goerlieth';
 const EMBEDDED_HELP_MESSAGE = {
@@ -23,6 +24,10 @@ const EMBEDDED_HELP_MESSAGE = {
       {
         name: "+goerlieth mod",
         value: "`Tags the maintainers of this bot, please use if you are experiencing any issues.`"
+      },
+      {
+        name: "+goerlieth add <address>",
+        value: "`Adds your address to the database. Please make sure it's correct, you won't be able to modify it later.`"
       }
     ]
   }
@@ -56,8 +61,12 @@ bot.on('message', (message) => {
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
 
-    if (web3.utils.isHexStrict(prefix0x(args[1]))){
+    if (web3.utils.isHexStrict(prefix0x(args[1]) && db.checkAddressExists(message.author.id))){
       bot.commands.get('goerliBot').execute(message, args, true);
+    }else if (!db.checkAddressExists(message.author.id)){
+      embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+          .setColor(0xff1100).setTimestamp();
+      message.lineReply(embed);
     }else{
       embed.setDescription('**Error**\nInvalid `Hex`. Please double check.')
           .setColor(0xff1100).setTimestamp();
@@ -76,6 +85,21 @@ bot.on('message', (message) => {
       case 'help': {
         console.log("help called");
         message.lineReply(EMBEDDED_HELP_MESSAGE);
+        break;
+      }
+      case 'add': {
+        console.log('add address called')
+        if (web3.utils.isAddress(args[2]) && !db.checkAddressExists(message.author.id)){
+          db.addAddress(message.author.id, args[2]);
+        }else if (!web3.utils.isAddress(args[2])){
+          embed.setDescription('**Error**\nPlease enter a valid address!')
+              .setColor(0xff1100).setTimestamp();
+          message.lineReply(embed);
+        }else{
+          embed.setDescription('**Error**\nYour address is already added to the database.')
+              .setColor(0xff1100).setTimestamp();
+          message.lineReply(embed);
+        }
         break;
       }
       case 'mod': {

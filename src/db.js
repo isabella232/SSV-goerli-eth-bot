@@ -22,9 +22,7 @@ pool.query('SELECT NOW()', (err, res) => {
 
 const createTable = `create table if not exists depositortest
 (
-    address           varchar not null
-    constraint depositortest_pk
-            primary key,
+    address           varchar not null constraint depositortest_pk primary key,
     norequests        integer,
     dailycount        real,
     weeklycount       real,
@@ -35,13 +33,24 @@ const createTable = `create table if not exists depositortest
     unaccountedamount real,
     unaccountedtx     varchar
 );`
-
+const createTable2 = `create table if not exists discordIdAddress(
+    address varchar not null,
+    discordID bigint not null
+)`
 pool.query(createTable, (err, res) => {
     if(err){
         console.log('depositor table creation failed',err);
     }
     else {
         console.log('depositor table created!');
+    }
+});
+pool.query(createTable2, (err, res) => {
+    if(err){
+        console.log('discordIdAddress table creation failed',err);
+    }
+    else {
+        console.log('discordIdAddress table created!');
     }
 });
 
@@ -53,7 +62,7 @@ module.exports = {
     confirmTransaction: async function(address, topUpAmount){
         //add try catch
 
-        var addressDetails = (await checkAddressExists(address));
+        var addressDetails = (await this.checkAddressExists(address));
         //console.log("Check account exists address details:",addressDetails);
         //Assumes addressDetails will always be an array
         if (!addressDetails.length){
@@ -77,21 +86,24 @@ module.exports = {
             await updateCounts(addressDetails, topUpAmount);
             return true
         } 
-        addressDetails = (await checkAddressExists(address))[0];
+        addressDetails = (await this.checkAddressExists(address))[0];
         //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
         return await validateTransaction(addressDetails, topUpAmount);
     },
-}
-
-async function checkAddressExists(address){
-    const select = `
-        SELECT * FROM depositortest 
+    checkAddressExists: async function checkAddressExists(id){
+        const select = `
+        SELECT * FROM discordIdAddress 
         WHERE address = $1
     `;
-    const value = [address]
-    const result = await pool.query(select,value);
-    return result.rows;
-
+        const value = [id]
+        const result = await pool.query(select, value);
+        return result.rows;
+    },
+    addAddress: async function addAddress(discordID, address){
+        const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
+        const values = [address, discordID]
+        await pool.query(update, values);
+    }
 }
 
 async function setDepositor(address){

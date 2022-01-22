@@ -47,7 +47,7 @@ exports.initializeCachedNonce = async () => {
 }
 
 exports.setCachedNonce = (nonce) => {
-  fs.writeFile(process.env.NONCE_FILE, nonce, function (err){ 
+  fs.writeFile(process.env.NONCE_FILE, nonce, function (err){
     if (err) throw err;
   })
 }
@@ -70,31 +70,31 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, receiverAddress, amo
   }
 
   web3.eth.accounts.signTransaction(transaction, FAUCET_PRIVATE_KEY)
-    .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-    .then(receipt => {
-      console.log("Sent to " + receiverAddress + " transaction receipt: ", receipt)
+      .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
+      .then(receipt => {
+        console.log("Sent to " + receiverAddress + " transaction receipt: ", receipt)
 
-      if (message) {
-        let embed = new Discord.MessageEmbed()
-            .setDescription(`"**Operation Succesful**\nSent ${amount} goerli ETH to ${receiverAddress}
+        if (message) {
+          let embed = new Discord.MessageEmbed()
+              .setDescription(`"**Operation Successful**\nSent ${amount} goerli ETH to ${receiverAddress}
          - please wait a few minutes for it to arrive.
           [Click here, to check the details at etherscan.io.]
           (https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
-        message.lineReply(embed);
-        let dataToWrite = `${message.author.id},${new Date()},${receiverAddress},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
-        fs.writeFile('txRecords/records.csv', dataToWrite, 'utf8', function (err) {
-          if (err) {
-            console.log('Some error occurred - file either not saved or corrupted file saved.');
-          } else{
-            console.log('Successfully written records to CSV file!');
-          }
-        });
-      }
-    })
-    .catch(err => {
-      console.error("this is the error: " + err);
-      throw err;
-    });
+          message.lineReply(embed);
+          let dataToWrite = `${message.author.id},${new Date()},${receiverAddress},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
+          fs.writeFile('txRecords/records.csv', dataToWrite, 'utf8', function (err) {
+            if (err) {
+              console.log('Some error occurred - file either not saved or corrupted file saved.');
+            } else{
+              console.log('Successfully written records to CSV file!');
+            }
+          });
+        }
+      })
+      .catch(err => {
+        console.error("this is the error: " + err);
+        throw err;
+      });
 }
 
 
