@@ -56,17 +56,20 @@ exports.setCachedNonce = (nonce) => {
 // Sending the goerli ETH
 exports.sendGoerliEth = (message, faucetAddress, faucetKey, receiverAddress, amount, nonce, gasPrice) => {
   console.log("In sendGoerliETH", faucetAddress, faucetKey, receiverAddress);
-  var rawTransaction = {
-    "from": faucetAddress, 
-    "to": receiverAddress,
-    "value": web3.utils.toHex(web3.utils.toWei(amount.toString(), "ether")),
-    "gas": 21000,
-    "gasPrice": gasPrice,
-    "chainId": 5, //goerli chain ID
-    "nonce": nonce,
-  };
+  const methodAbi = process.env.METHOD_ABI
 
-  web3.eth.accounts.signTransaction(rawTransaction, faucetKey)
+  const transaction = {
+    from: FAUCET_ADDRESS,
+    to: depositTo,
+    gas: 100000,
+    value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
+    data: methodAbi,
+    gasPrice: DEFAULT_GAS_PRICE,
+    chainID: 5,
+    nonce,
+  }
+
+  web3.eth.accounts.signTransaction(transaction, FAUCET_PRIVATE_KEY)
     .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
     .then(receipt => {
       console.log("Sent to " + receiverAddress + " transaction receipt: ", receipt)
