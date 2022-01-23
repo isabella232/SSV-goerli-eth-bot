@@ -33,7 +33,7 @@ const createTable = `create table if not exists depositortest
     unaccountedamount real,
     unaccountedtx     varchar
 );`
-const createTable2 = `create table if not exists discordidAddress(
+const createTable2 = `create table if not exists discordidaddress(
     address varchar not null,
     discordid bigint not null
 )`
@@ -89,13 +89,14 @@ module.exports = {
                     await updateCounts(userDetails, topUpAmount);
                     return true
                 } 
-                const address = (await this.checkAddressExists(userDetails.discordid)).rows[0].address
-                if (address === undefined){
+                const addressQuery = (await this.checkAddressExists(userDetails.discordid))
+                if (!addressQuery.length){
+                    return 500
                     //message line reply that please register address for more goerli here
                 }
 
                 userDetails = (await checkUserExists(discordID))[0];
-                userDetails.address = address;
+                userDetails.address = addressQuery[0].address;
                 //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
                 return await validateTransaction(userDetails, topUpAmount);
             } catch (e) {
@@ -106,7 +107,7 @@ module.exports = {
     },
     checkAddressExists: async function checkAddressExists(id){
         const select = `
-        SELECT address FROM discordidAddress 
+        SELECT address FROM discordidaddress 
         WHERE discordid = $1
     `;
         const value = [id]
@@ -114,7 +115,7 @@ module.exports = {
         return result.rows;
     },
     addAddress: function addAddress(discordID, address){
-        const update = 'insert into discordidAddress(address, discordid) values ($1, $2);'
+        const update = 'insert into discordidaddress(address, discordid) values ($1, $2);'
         const values = [address, discordID]
         pool.query(update, values);
     }
@@ -131,7 +132,6 @@ async function checkUserExists(discordID){
 }
 
 async function setDepositor(discordID){
-    console.log("here",discordID)
     const now = new Date();
     const insert = `
         INSERT INTO depositortest 
