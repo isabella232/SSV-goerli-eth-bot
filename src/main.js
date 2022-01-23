@@ -57,7 +57,7 @@ bot.on('message', (message) => {
 
     if (args[1].startsWith('0x')){
       if (web3.utils.isHexStrict(args[1])){
-        bot.commands.get('goerliBot').execute(message, args, true);}
+        bot.commands.get('goerliBot').execute(message, args, true);}}
     //     if (db.checkAddressExists(BigInt(message.author.id))){
     //       bot.commands.get('goerliBot').execute(message, args, true);
     //     }else if (!db.checkAddressExists(BigInt(message.author.id))){
