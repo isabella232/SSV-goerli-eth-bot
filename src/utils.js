@@ -81,8 +81,8 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, n
          - please wait a few minutes for it to arrive.
           To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
           message.lineReply(embed);
-          let dataToWrite = fs.readFileSync('src/txRecords/records.csv', 'utf8') + `\n${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
-          fs.writeFile('./src/txRecords/records.csv', dataToWrite, 'utf8', function (err) {
+          let dataToWrite = fs.readFileSync('../src/txRecords/records.csv', 'utf8') + `\n${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
+          fs.writeFile('../src/txRecords/records.csv', dataToWrite, 'utf8', function (err) {
             if (err) {
               console.log("Error in write to CSV: ", err);
             } else{
