@@ -51,20 +51,11 @@ bot.on('message', (message) => {
     let embed = new Discord.MessageEmbed()
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
-
-    console.log('Check address exists for this id: ', db.checkAddressExists(BigInt(message.author.id)));
-    console.log('isHexStrict: ', web3.utils.isHexStrict(args[1]));
+    const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
     if (args[1].startsWith('0x')){
       if (web3.utils.isHexStrict(args[1])){
         bot.commands.get('goerliBot').execute(message, args, true);
-      //   if (db.checkAddressExists(BigInt(message.author.id)){
-      //     bot.commands.get('goerliBot').execute(message, args, true);
-      //   }else if (!db.checkAddressExists(BigInt(message.author.id))){
-      //     embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
-      //         .setColor(0xff1100).setTimestamp();
-      //     message.lineReply(embed);
-      //   }
       }else if (web3.utils.isAddress(args[1])){
         embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
             .setColor(0xff1100).setTimestamp();
@@ -97,7 +88,7 @@ bot.on('message', (message) => {
           message.lineReply(embed);
           break;
         }
-        if (web3.utils.isAddress(args[2]) && !db.checkAddressExists(BigInt(message.author.id))){
+        if (web3.utils.isAddress(args[2]) && addressExists){
           db.addAddress(message.author.id, args[2]);
           embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
               .setColor(3447003).setTimestamp();
@@ -106,7 +97,7 @@ bot.on('message', (message) => {
           embed.setDescription('**Error**\nPlease enter a valid address!')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
-        }else{
+        }else if (addressExists){
           embed.setDescription('**Error**\nYour address is already added to the database.')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);

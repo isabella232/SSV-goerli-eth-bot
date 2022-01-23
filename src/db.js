@@ -111,8 +111,9 @@ module.exports = {
         WHERE discordid = $1
     `;
         const value = [id]
-        const result = await pool.query(select, value);
-        return result.rows;
+        pool.query(select, value).then(function (result){
+            return result.rows[0]
+        });
     },
     addAddress: function addAddress(discordID, address){
         const update = 'insert into discordidaddress(address, discordid) values ($1, $2);'
