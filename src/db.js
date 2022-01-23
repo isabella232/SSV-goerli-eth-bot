@@ -89,6 +89,11 @@ module.exports = {
                     await updateCounts(userDetails, topUpAmount);
                     return true
                 } 
+                
+                if (await this.checkAddressExists(userDetails.discordid)){
+                    //message line reply that please register address for more goerli here
+                }
+
                 userDetails = (await checkUserExists(discordID))[0];
                 //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
                 return await validateTransaction(userDetails, topUpAmount);
