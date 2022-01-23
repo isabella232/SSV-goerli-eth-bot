@@ -89,8 +89,19 @@ bot.on('message', (message) => {
       }
       case 'add': {
         console.log('add address called')
+        if (!args[2]){
+          embed.setDescription("**Error**\nPlease provide an address to add, i.e. `+goerlieth add <your address>`");
+          message.lineReply(embed);
+          break;
+        }
         if (web3.utils.isAddress(args[2]) && !db.checkAddressExists(message.author.id)){
-          db.addAddress(message.author.id, args[2]);
+          db.addAddress(message.author.id, args[2]).then(()=>{
+            embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
+                .setColor(3447003).setTimestamp();
+            message.lineReply(embed);
+          }, (error)=>{
+            console.log(error);
+          });
         }else if (!web3.utils.isAddress(args[2])){
           embed.setDescription('**Error**\nPlease enter a valid address!')
               .setColor(0xff1100).setTimestamp();

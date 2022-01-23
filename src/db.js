@@ -34,24 +34,13 @@ const createTable = `create table if not exists depositortest
     unaccountedamount real,
     unaccountedtx     varchar
 );`
-const createTable2 = `create table if not exists discordIdAddress(
-    address varchar not null,
-    discordID bigint not null
-)`
+
 pool.query(createTable, (err, res) => {
     if(err){
         console.log('depositor table creation failed',err);
     }
     else {
         console.log('depositor table created!');
-    }
-});
-pool.query(createTable2, (err, res) => {
-    if(err){
-        console.log('discordIdAddress table creation failed',err);
-    }
-    else {
-        console.log('discordIdAddress table created!');
     }
 });
 
@@ -67,7 +56,9 @@ module.exports = {
         //console.log("Check account exists address details:",userDetails);
         //Assumes userDetails will always be an array
         if (!userDetails.length){
-            const userDetails = await setDepositor(discordID);
+
+            // const userDetails = await setDepositor(discordID);
+
             await updateCounts(userDetails, topUpAmount);
             return true
         }
@@ -91,21 +82,21 @@ module.exports = {
         //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
         return await validateTransaction(userDetails, topUpAmount);
     },
-    /*
     checkAddressExists: async function checkAddressExists(id){
         const select = `
-        SELECT * FROM discordIdAddress 
-        WHERE address = $1
+        SELECT address FROM depositortest 
+        WHERE discordid = $1
     `;
         const value = [id]
         const result = await pool.query(select, value);
         return result.rows;
     },
     addAddress: async function addAddress(discordID, address){
-        const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
-        const values = [address, discordID]
+        await setDepositor(Number(discordID));
+        const update = 'update depositortest set address=$1 where discord= $2';
+        const values = [address, Number(discordID)]
         await pool.query(update, values);
-    }*/
+    }
 }
 
 async function checkUserExists(discordID){
