@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const Discord = require('discord.js');
+const Discord = require('discord.js')
 const goerliBot = require('./goerliBot.js');
 require('discord-reply');
 const bot = new Discord.Client();
@@ -34,7 +34,6 @@ const EMBEDDED_HELP_MESSAGE = {
 }
 
 let yourBotToken = process.env.DISCORD_BOT_TOKEN;
-bot.login(yourBotToken);
 
 bot.commands = new Discord.Collection();
 bot.commands.set(goerliBot.name, goerliBot);
@@ -56,17 +55,27 @@ bot.on('message', (message) => {
     console.log('Check address exists for this id: ', db.checkAddressExists(BigInt(message.author.id)));
     console.log('isHexStrict: ', web3.utils.isHexStrict(args[1]));
 
-    if (args[1].startsWith('0x') && web3.utils.isHexStrict(args[1])){
-      if (db.checkAddressExists(BigInt(message.author.id))){
-        bot.commands.get('goerliBot').execute(message, args, true);
-      }else if (!db.checkAddressExists(BigInt(message.author.id))){
-        embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+    if (args[1].startsWith('0x')){
+      if (web3.utils.isHexStrict(args[1])){
+        if (db.checkAddressExists(BigInt(message.author.id))){
+          bot.commands.get('goerliBot').execute(message, args, true);
+        }else if (!db.checkAddressExists(BigInt(message.author.id))){
+          embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+              .setColor(0xff1100).setTimestamp();
+          message.lineReply(embed);
+        }
+      }else if (web3.utils.isAddress(args[1])){
+        embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+      }else{
+        embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
       }
     }
 
-    switch(args[1]){ 
+    switch(args[1]){
       // Faucet commands
       case 'null': {
         embed.setDescription('**Error**\nUse `+goerlieth help` for the list of commands!')
@@ -88,13 +97,10 @@ bot.on('message', (message) => {
           break;
         }
         if (web3.utils.isAddress(args[2]) && !db.checkAddressExists(BigInt(message.author.id))){
-          db.addAddress(message.author.id, args[2]).then(()=>{
-            embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
-                .setColor(3447003).setTimestamp();
-            message.lineReply(embed);
-          }, (error)=>{
-            console.log(error);
-          });
+          db.addAddress(message.author.id, args[2]);
+          embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
+              .setColor(3447003).setTimestamp();
+          message.lineReply(embed);
         }else if (!web3.utils.isAddress(args[2])){
           embed.setDescription('**Error**\nPlease enter a valid address!')
               .setColor(0xff1100).setTimestamp();
@@ -130,3 +136,4 @@ bot.on('message', (message) => {
     message.lineReply(embed);
   }
 });
+bot.login(yourBotToken);

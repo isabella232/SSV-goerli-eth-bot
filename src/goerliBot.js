@@ -2,7 +2,6 @@ require('dotenv').config({path: '../.env'})
 
 const utils = require('./utils.js');
 const Discord = require('discord.js');
-require('discord-reply');
 const etherscan = require('./api.js');
 const db = require('./db.js');
 const Web3 = require('web3');
@@ -15,7 +14,6 @@ const INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli et
 const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.  You must pass the custom checks;";
 
 const maxDepositAmount = Number(process.env.MAX_DEPOSIT_AMOUNT) 
-let embed = new Discord.MessageEmbed()
 
 const runCustomEligibilityChecks = async (hexData, topUpAmount) => {
   const res = await db.confirmTransaction(hexData, topUpAmount);
@@ -72,7 +70,7 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
     if (message) {
       embed.setDescription("**Operation Unsuccessful**\nThe Bot does not have enough Goerli ETH.  Please contact the maintainers.").
       setTimestamp().setColor(0xff1100);
-      message.lineReply(embed);
+      await message.lineReply(embed);
     }
     return;
   }
@@ -82,7 +80,7 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
     if (message) {
       embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')
           .setTimestamp().setColor(3447003);
-      message.lineReply(embed);
+      await message.lineReply(embed);
     }
   }
 
@@ -95,22 +93,22 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
     if (message) {
       embed.setDescription(m)
           .setTimestamp().setColor(3447003);
-      message.lineReply(embed);
+      await message.lineReply(embed);
     }
     return;
   }
 
   console.log("Checks passed - sending to " +  message.author.id);
   if (message) {
-    embed.MessageEmbed().setDescription("**Operation Successful**\nChecks passed - sending...").
+    embed.setDescription("**Operation Successful**\nChecks passed - sending...").
     setTimestamp().setColor(3447003);
-    message.lineReply(embed);
+    await message.lineReply(embed);
   }
 
   const nonce = utils.getCachedNonce();
   utils.sendGoerliEth(message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, topUpAmount/Math.pow(10,18), nonce, DEFAULT_GAS_PRICE);
   
-  utils.incrementCachedNonce();
+  await utils.incrementCachedNonce();
 }
 
 // This runs once when imported (bot starting) to cache the nonce in a local file
