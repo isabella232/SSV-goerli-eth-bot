@@ -89,7 +89,13 @@ module.exports = {
                     await updateCounts(userDetails, topUpAmount);
                     return true
                 } 
+                const address = (await this.checkAddressExists(userDetails.discordid)).rows[0].address
+                if (address === undefined){
+                    //message line reply that please register address for more goerli here
+                }
+
                 userDetails = (await checkUserExists(discordID))[0];
+                userDetails.address = address;
                 //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
                 return await validateTransaction(userDetails, topUpAmount);
             } catch (e) {
@@ -134,15 +140,9 @@ async function setDepositor(discordID){
         `
     const insertVals = [BigInt(discordID),1,0,0,now,now,now,"",0,""];
     await pool.query(insert, insertVals);
-    const select = `
-        SELECT address FROM discordIdAddress
-        WHERE discordID = $1
-    `;
-    const value = [BigInt(discordID)]
-    const address = (await pool.query(select, value));
     return {
         discordid: BigInt(discordID),
-        address: address.rows[0].address,
+        address: '',
         norequests: 1,
         dailycount: 0,
         weeklycount: 0,
