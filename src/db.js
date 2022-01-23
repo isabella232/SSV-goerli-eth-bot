@@ -66,9 +66,7 @@ module.exports = {
         //console.log("Check account exists address details:",userDetails);
         //Assumes userDetails will always be an array
         if (!userDetails.length){
-
-            // const userDetails = await setDepositor(discordID);
-
+            const userDetails = await setDepositor(discordID);
             await updateCounts(userDetails, topUpAmount);
             return true
         }
@@ -133,7 +131,7 @@ async function setDepositor(discordID){
         WHERE discordID = $1
     `;
     const value = [BigInt(discordID)]
-    const address = await pool.query(select, value).rows[0].address;
+    const address = (await pool.query(select, value)).rows[0].address;
     result = {
         discordid: BigInt(discordID),
         address: address,
@@ -198,7 +196,7 @@ async function resetWeeklyCount(userDetails){
 async function resetNoRequests(userDetails){
     // console.log(userDetails)
     const now = new Date();
-    const discordID = BigInt(userDetails.discordID);
+    const discordID = BigInt(userDetails.discordid);
     const firstrequesttime = userDetails.firstrequesttime;
     if ((Math.floor(now.getTime()/1000 - Math.floor(firstrequesttime.getTime()/1000))) > 172800){
         //update
