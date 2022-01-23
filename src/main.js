@@ -43,14 +43,6 @@ bot.on('ready', () => {
   console.log('I am ready!');
 });
 
-function prefix0x(hex){
-  if (!hex.startsWith('0x')){
-    return `0x${hex}`
-  }else{
-    return hex
-  }
-}
-
 bot.on('message', (message) => {
   try {
     if (!message || message.length === 0 || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) {
@@ -61,21 +53,19 @@ bot.on('message', (message) => {
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
 
-    console.log('Check address exists: ', db.checkAddressExists(BigInt(message.author.id)));
+    console.log('Check address exists for this id: ', db.checkAddressExists(BigInt(message.author.id)));
     console.log('isHexStrict: ', web3.utils.isHexStrict(args[1]));
 
-    if (web3.utils.isHexStrict(prefix0x(args[1]) && db.checkAddressExists(BigInt(message.author.id)))){
-      bot.commands.get('goerliBot').execute(message, args, true);
-    }else if (!db.checkAddressExists(BigInt(message.author.id))){
-      embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
-          .setColor(0xff1100).setTimestamp();
-      message.lineReply(embed);
-    }else if (!web3.utils.isHexStrict(prefix0x(args[1]))){
-      embed.setDescription('**Error**\nInvalid `Hex`. Please double check.')
-          .setColor(0xff1100).setTimestamp();
-      message.lineReply(embed);
+    if (args[1].startsWith('0x') && web3.utils.isHexStrict(args[1])){
+      if (db.checkAddressExists(BigInt(message.author.id))){
+        bot.commands.get('goerliBot').execute(message, args, true);
+      }else if (!db.checkAddressExists(BigInt(message.author.id))){
+        embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+      }
     }
-    
+
     switch(args[1]){ 
       // Faucet commands
       case 'null': {
