@@ -76,12 +76,20 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
   }
 
   const receiverEligible = await receiverIsEligible(message.author.id, 32, runCustomChecks);
-  if (receiverIsEligible === null){
+  if (receiverEligible === null){
     if (message) {
       embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')
           .setTimestamp().setColor(3447003);
       await message.lineReply(embed);
     }
+  }
+  if (receiverEligible === 500){
+    if (message) {
+      embed.setDescription('**Error**\nPlease register your address using +goerlieth add command.')
+          .setTimestamp().setColor(3447003);
+      await message.lineReply(embed);
+    }
+    return;
   }
 
   if (!receiverEligible) {
