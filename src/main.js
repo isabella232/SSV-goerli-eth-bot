@@ -61,9 +61,9 @@ bot.on('message', (message) => {
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
 
-    if (web3.utils.isHexStrict(prefix0x(args[1]) && db.checkAddressExists(message.author.id))){
+    if (web3.utils.isHexStrict(prefix0x(args[1]) && db.checkAddressExists(BigInt(message.author.id)))){
       bot.commands.get('goerliBot').execute(message, args, true);
-    }else if (!db.checkAddressExists(message.author.id)){
+    }else if (!db.checkAddressExists(BigInt(message.author.id))){
       embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
           .setColor(0xff1100).setTimestamp();
       message.lineReply(embed);
@@ -94,7 +94,7 @@ bot.on('message', (message) => {
           message.lineReply(embed);
           break;
         }
-        if (web3.utils.isAddress(args[2]) && !db.checkAddressExists(message.author.id)){
+        if (web3.utils.isAddress(args[2]) && !db.checkAddressExists(BigInt(message.author.id))){
           db.addAddress(message.author.id, args[2]).then(()=>{
             embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
                 .setColor(3447003).setTimestamp();

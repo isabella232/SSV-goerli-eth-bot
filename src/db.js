@@ -102,7 +102,7 @@ module.exports = {
         return result.rows;
     },
     addAddress: async function addAddress(discordID, address){
-        await setDepositor(Number(discordID));
+        await setDepositor(BigInt(discordID));
         const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
         const values = [address, discordID]
         await pool.query(update, values);
@@ -114,7 +114,7 @@ async function checkUserExists(discordID){
         SELECT * FROM depositortest 
         WHERE discordid = $1
     `;
-        const value = [discordID]
+        const value = [BigInt(discordID)]
         const result = await pool.query(select, value);
         return result.rows;
 }
@@ -126,16 +126,16 @@ async function setDepositor(discordID){
             (discordid,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
         `
-    const insertVals = [discordID,1,0,0,now,now,now,"",0,""];
+    const insertVals = [BigInt(discordID),1,0,0,now,now,now,"",0,""];
     let result = await pool.query(insert, insertVals);
     const select = `
         SELECT address FROM discordIdAddress
         WHERE discordID = $1
     `;
-    const value = [discordID]
+    const value = [BigInt(discordID)]
     const address = await pool.query(select, value).rows[0].address;
     result = {
-        discordid: discordID,
+        discordid: BigInt(discordID),
         address: address,
         norequests: 1,
         dailycount: 0,
@@ -160,7 +160,7 @@ async function checkDailyLimit(userDetails){
 async function resetDailyCount(userDetails){
     const now = new Date();
     // console.log(userDetails);
-    const discordID = Number(userDetails.discordid);
+    const discordID = BigInt(userDetails.discordid);
     const dailytime = userDetails.dailytime;
     if ((Math.floor(now.getTime()/1000 - Math.floor(dailytime.getTime()/1000))) > 86400){
         //update
@@ -182,7 +182,7 @@ async function checkWeeklyLimit(userDetails){
 
 async function resetWeeklyCount(userDetails){
     const now = new Date();
-    const discordID = String(userDetails.discordid);
+    const discordID = BigInt(userDetails.discordid);
     const weeklytime = userDetails.weeklytime;
 
     if ((Math.floor(now.getTime()/1000 - Math.floor(weeklytime.getTime()/1000))) > 604800){
@@ -198,7 +198,7 @@ async function resetWeeklyCount(userDetails){
 async function resetNoRequests(userDetails){
     // console.log(userDetails)
     const now = new Date();
-    const discordID = String(userDetails.discordID);
+    const discordID = BigInt(userDetails.discordID);
     const firstrequesttime = userDetails.firstrequesttime;
     if ((Math.floor(now.getTime()/1000 - Math.floor(firstrequesttime.getTime()/1000))) > 172800){
         //update
