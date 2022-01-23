@@ -77,14 +77,14 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, n
 
         if (message) {
           let embed = new Discord.MessageEmbed()
-              .setDescription(`**Operation Successful**\nSent ${amount} goerli ETH to <@!${message.author.id}>
+              .setDescription(`**Operation Successful**\nSent ${amount} goerli ETH to <@&${message.author.id}>
          - please wait a few minutes for it to arrive.
-          To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash}).`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
+          To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
           message.lineReply(embed);
-          let dataToWrite = `${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
-          fs.writeFile('txRecords/records.csv', dataToWrite, 'utf8', function (err) {
+          let dataToWrite = fs.readFileSync('src/txRecords/records.csv', 'utf8') + `\n${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
+          fs.writeFile('./src/txRecords/records.csv', dataToWrite, 'utf8', function (err) {
             if (err) {
-              console.log('Some error occurred - file either not saved or corrupted file saved.');
+              console.log("Error in write to CSV: ", err);
             } else{
               console.log('Successfully written records to CSV file!');
             }
