@@ -22,8 +22,7 @@ pool.query('SELECT NOW()', (err, res) => {
 
 const createTable = `create table if not exists depositortest
 (
-    discordid           bigint not null constraint depositortest_pk primary key,
-    address             varchar,
+    discordid         bigint not null constraint depositortest_pk primary key,
     norequests        integer,
     dailycount        real,
     weeklycount       real,
@@ -34,7 +33,18 @@ const createTable = `create table if not exists depositortest
     unaccountedamount real,
     unaccountedtx     varchar
 );`
-
+const createTable2 = `create table if not exists discordIdAddress(
+    address varchar not null,
+    discordID bigint not null
+)`
+pool.query(createTable2, (err, res) => {
+    if(err){
+        console.log('discordIdAddress table creation failed',err);
+    }
+    else {
+        console.log('discordIdAddress table created!');
+    }
+});
 pool.query(createTable, (err, res) => {
     if(err){
         console.log('depositor table creation failed',err);
@@ -84,8 +94,8 @@ module.exports = {
     },
     checkAddressExists: async function checkAddressExists(id){
         const select = `
-        SELECT address FROM depositortest 
-        WHERE discordid = $1
+        SELECT address FROM discordIdAddress 
+        WHERE discordID = $1
     `;
         const value = [id]
         const result = await pool.query(select, value);
@@ -93,8 +103,8 @@ module.exports = {
     },
     addAddress: async function addAddress(discordID, address){
         await setDepositor(Number(discordID));
-        const update = 'update depositortest set address=$1 where discord= $2';
-        const values = [address, Number(discordID)]
+        const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
+        const values = [address, discordID]
         await pool.query(update, values);
     }
 }
@@ -113,13 +123,20 @@ async function setDepositor(discordID){
     const now = new Date();
     const insert = `
         INSERT INTO depositortest 
-            (discordid,address,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+            (discordid,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
         `
-    const insertVals = [discordID,'',1,0,0,now,now,now,"",0,""];
-    var result = await pool.query(insert, insertVals);
+    const insertVals = [discordID,1,0,0,now,now,now,"",0,""];
+    let result = await pool.query(insert, insertVals);
+    const select = `
+        SELECT address FROM discordIdAddress
+        WHERE discordID = $1
+    `;
+    const value = [discordID]
+    const address = await pool.query(select, value).rows[0].address;
     result = {
         discordid: discordID,
+        address: address,
         norequests: 1,
         dailycount: 0,
         weeklycount: 0,
@@ -128,7 +145,7 @@ async function setDepositor(discordID){
         weeklytime: now,
         validatedTx: "",
         unaccountedamount: 0,
-        unaccountedamount: ""
+        unaccountedtx: ""
     }
     return result;
 }
@@ -143,7 +160,7 @@ async function checkDailyLimit(userDetails){
 async function resetDailyCount(userDetails){
     const now = new Date();
     // console.log(userDetails);
-    const discordID = String(userDetails.discordid);
+    const discordID = Number(userDetails.discordid);
     const dailytime = userDetails.dailytime;
     if ((Math.floor(now.getTime()/1000 - Math.floor(dailytime.getTime()/1000))) > 86400){
         //update
