@@ -90,20 +90,21 @@ module.exports = {
         //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
         return await validateTransaction(userDetails, topUpAmount);
     },
-    checkAddressExists: async function checkAddressExists(id){
+    checkAddressExists: function checkAddressExists(id){
         const select = `
         SELECT address FROM discordIdAddress 
         WHERE discordID = $1
     `;
         const value = [id]
-        const result = await pool.query(select, value);
+        const result = pool.query(select, value);
         return result.rows;
     },
-    addAddress: async function addAddress(discordID, address){
-        await setDepositor(BigInt(discordID));
-        const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
-        const values = [address, discordID]
-        await pool.query(update, values);
+    addAddress: function addAddress(discordID, address){
+        setDepositor(BigInt(discordID)).then(()=>{
+            const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
+            const values = [address, discordID]
+            pool.query(update, values);
+        })
     }
 }
 

@@ -53,17 +53,17 @@ bot.on('message', (message) => {
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
 
+    console.log('Check address exists for this id: ', db.checkAddressExists(BigInt(message.author.id)));
     console.log('isHexStrict: ', web3.utils.isHexStrict(args[1]));
 
     if (args[1].startsWith('0x') && web3.utils.isHexStrict(args[1])){
-      bot.commands.get('goerliBot').execute(message, args, true);
-      // if (db.checkAddressExists(BigInt(message.author.id))){
-      //   bot.commands.get('goerliBot').execute(message, args, true);
-      // }else if (!db.checkAddressExists(BigInt(message.author.id))){
-      //   embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
-      //       .setColor(0xff1100).setTimestamp();
-      //   message.lineReply(embed);
-      // }
+      if (db.checkAddressExists(BigInt(message.author.id))){
+        bot.commands.get('goerliBot').execute(message, args, true);
+      }else if (!db.checkAddressExists(BigInt(message.author.id))){
+        embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+      }
     }
 
     switch(args[1]){ 
