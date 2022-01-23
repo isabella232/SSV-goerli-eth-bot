@@ -98,13 +98,13 @@ module.exports = {
             }
         }
     },
-    checkAddressExists: function checkAddressExists(id){
+    checkAddressExists: async function checkAddressExists(id){
         const select = `
         SELECT address FROM discordIdAddress 
         WHERE discordID = $1
     `;
         const value = [id]
-        const result = pool.query(select, value);
+        const result = await pool.query(select, value);
         return result.rows;
     },
     addAddress: function addAddress(discordID, address){
@@ -133,16 +133,16 @@ async function setDepositor(discordID){
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
         `
     const insertVals = [BigInt(discordID),1,0,0,now,now,now,"",0,""];
-    let result = await pool.query(insert, insertVals);
+    await pool.query(insert, insertVals);
     const select = `
         SELECT address FROM discordIdAddress
         WHERE discordID = $1
     `;
     const value = [BigInt(discordID)]
-    const address = (await pool.query(select, value)).rows[0].address;
-    result = {
+    const address = (await pool.query(select, value));
+    return {
         discordid: BigInt(discordID),
-        address: address,
+        address: address.rows[0].address,
         norequests: 1,
         dailycount: 0,
         weeklycount: 0,
@@ -152,8 +152,7 @@ async function setDepositor(discordID){
         validatedTx: "",
         unaccountedamount: 0,
         unaccountedtx: ""
-    }
-    return result;
+    };
 }
 
 async function checkDailyLimit(userDetails){

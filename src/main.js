@@ -34,7 +34,7 @@ const EMBEDDED_HELP_MESSAGE = {
 }
 
 let yourBotToken = process.env.DISCORD_BOT_TOKEN;
-
+bot.login(yourBotToken);
 bot.commands = new Discord.Collection();
 bot.commands.set(goerliBot.name, goerliBot);
 
@@ -57,24 +57,23 @@ bot.on('message', (message) => {
 
     if (args[1].startsWith('0x')){
       if (web3.utils.isHexStrict(args[1])){
-        bot.commands.get('goerliBot').execute(message, args, true);}}
-    //     if (db.checkAddressExists(BigInt(message.author.id))){
-    //       bot.commands.get('goerliBot').execute(message, args, true);
-    //     }else if (!db.checkAddressExists(BigInt(message.author.id))){
-    //       embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
-    //           .setColor(0xff1100).setTimestamp();
-    //       message.lineReply(embed);
-    //     }
-    //   }else if (web3.utils.isAddress(args[1])){
-    //     embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
-    //         .setColor(0xff1100).setTimestamp();
-    //     message.lineReply(embed);
-    //   }else{
-    //     embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
-    //         .setColor(0xff1100).setTimestamp();
-    //     message.lineReply(embed);
-    //   }
-    // }
+        if (db.checkAddressExists(BigInt(message.author.id))){
+          bot.commands.get('goerliBot').execute(message, args, true);
+        }else if (!db.checkAddressExists(BigInt(message.author.id))){
+          embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+              .setColor(0xff1100).setTimestamp();
+          message.lineReply(embed);
+        }
+      }else if (web3.utils.isAddress(args[1])){
+        embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+      }else{
+        embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+      }
+    }
 
     switch(args[1]){
       // Faucet commands
@@ -137,4 +136,3 @@ bot.on('message', (message) => {
     message.lineReply(embed);
   }
 });
-bot.login(yourBotToken);

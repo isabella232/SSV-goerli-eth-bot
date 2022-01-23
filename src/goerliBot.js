@@ -11,7 +11,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_E
 const DEFAULT_GAS_PRICE = 1500000000000; // 1,500 gwei
 
 const INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.";
-const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.  You must pass the custom checks;";
+const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.  You must pass the custom checks.";
 
 const maxDepositAmount = Number(process.env.MAX_DEPOSIT_AMOUNT) 
 
@@ -85,7 +85,7 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
   }
 
   if (!receiverEligible) {
-    const m = runCustomChecks ? message.author.id + INELIGIBLE_CUSTOM_CHECKS_MESSAGE
+    const m = runCustomChecks ? message.author.mention + INELIGIBLE_CUSTOM_CHECKS_MESSAGE
       : message.author.id + INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE;
 
     console.log(m);
