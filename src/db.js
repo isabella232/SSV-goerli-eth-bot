@@ -57,38 +57,46 @@ pool.query(createTable, (err, res) => {
 const depositAmount = process.env.DEPOSIT_AMOUNT; //should be 32000000000000000000
 const dailyLimit = parseFloat(process.env.DAILY_LIMIT);
 const weeklyLimit = parseFloat(process.env.WEEKLY_LIMIT);
+const maxTries = 3;
 
 module.exports = {
     confirmTransaction: async function(discordID, topUpAmount){
         //add try catch
-
-        var userDetails = (await checkUserExists(discordID));
-        //console.log("Check account exists address details:",userDetails);
-        //Assumes userDetails will always be an array
-        if (!userDetails.length){
-            const userDetails = await setDepositor(discordID);
-            await updateCounts(userDetails, topUpAmount);
-            return true
+        var count = 0
+        while (true){
+            try{
+                var userDetails = (await checkUserExists(discordID));
+                //console.log("Check account exists address details:",userDetails);
+                //Assumes userDetails will always be an array
+                if (!userDetails.length){
+                    const userDetails = await setDepositor(discordID);
+                    await updateCounts(userDetails, topUpAmount);
+                    return true
+                }
+                userDetails = userDetails[0];
+                //refresh daily limit and weekly limit 
+                //check daily limit and weekly limit
+                //If either are reached reject transaction
+                if (!(await checkDailyLimit(userDetails))){
+                    return false;
+                }
+                if (!(await checkWeeklyLimit(userDetails))){
+                    return false;
+                }
+                //refresh norequests
+                const norequests = await resetNoRequests(userDetails);
+                if (norequests === 0){
+                    await updateCounts(userDetails, topUpAmount);
+                    return true
+                } 
+                userDetails = (await checkUserExists(discordID))[0];
+                //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
+                return await validateTransaction(userDetails, topUpAmount);
+            } catch (e) {
+                console.log(e)
+                if (++count == maxTries) return null;
+            }
         }
-        userDetails = userDetails[0];
-        //refresh daily limit and weekly limit 
-        //check daily limit and weekly limit
-        //If either are reached reject transaction
-        if (!(await checkDailyLimit(userDetails))){
-            return false;
-        }
-        if (!(await checkWeeklyLimit(userDetails))){
-            return false;
-        }
-        //refresh norequests
-        const norequests = await resetNoRequests(userDetails);
-        if (norequests === 0){
-            await updateCounts(userDetails, topUpAmount);
-            return true
-        } 
-        userDetails = (await checkUserExists(discordID))[0];
-        //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
-        return await validateTransaction(userDetails, topUpAmount);
     },
     checkAddressExists: function checkAddressExists(id){
         const select = `
@@ -119,6 +127,7 @@ async function checkUserExists(discordID){
 }
 
 async function setDepositor(discordID){
+    console.log("here",discordID)
     const now = new Date();
     const insert = `
         INSERT INTO depositortest 
@@ -245,7 +254,7 @@ async function validateTransaction(userDetails, topUpAmount){   // make a column
         let depositedTx = getUnvalidatedTx((await checkDeposit(userDetails.address)), lastValidatedTx); // confirm checkDeposit.confirmTransaction function
         console.log(depositedTx);
         let depositComplete = false;
-        if (depositedTx){
+        if (depositedTx.length){
           if (lastValidatedTx){
             for (let i = 0; i < depositedTx.length; i++){
                 if ((Number(depositedTx[i].amount) == depositAmount) && (depositedTx[i].hash != lastValidatedTx) && userDetails.unaccountedamount < Number(depositAmount)){
