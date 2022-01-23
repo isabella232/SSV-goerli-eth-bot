@@ -132,7 +132,7 @@ async function setDepositor(discordID){
             (discordid,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
         `
-    const insertVals = [BigInt(discordID),0,0,0,now,now,now,"",0,""];
+    const insertVals = [BigInt(discordID),1,0,0,now,now,now,"",0,""];
     let result = await pool.query(insert, insertVals);
     const select = `
         SELECT address FROM discordIdAddress
@@ -143,7 +143,7 @@ async function setDepositor(discordID){
     result = {
         discordid: BigInt(discordID),
         address: address,
-        norequests: 0,
+        norequests: 1,
         dailycount: 0,
         weeklycount: 0,
         firstrequesttime: now,
