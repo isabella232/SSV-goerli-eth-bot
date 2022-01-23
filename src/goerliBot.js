@@ -15,26 +15,30 @@ const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth. 
 
 const maxDepositAmount = Number(process.env.MAX_DEPOSIT_AMOUNT) 
 
-const runCustomEligibilityChecks = async (address, topUpAmount) => {
-  const res = await db.confirmTransaction(address, topUpAmount/Math.pow(10,18));
+const runCustomEligibilityChecks = async (hexData, topUpAmount) => {
+  const res = await db.confirmTransaction(hexData, topUpAmount);
   console.log(res)
   return res
 
 }
 
-const receiverIsEligible = async (address, amountRequested, runCustomChecks)  => {
+const receiverIsEligible = async (discordID, amountRequested, runCustomChecks)  => {
   const needsGoerliEth = true;
   if (runCustomChecks) {
-    const passedCustomChecks = await runCustomEligibilityChecks(address, amountRequested);
+    const passedCustomChecks = await runCustomEligibilityChecks(discordID, amountRequested);
     return needsGoerliEth && passedCustomChecks;
   } else {
     return needsGoerliEth;
   }
 }
 
-const runGoerliFaucet = async (message, address, runCustomChecks) => {
+const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
   let embed = new Discord.MessageEmbed();
-  const currentBalance = await etherscan.getBalance(address);
+
+  //Cannot check address balance
+
+  //const currentBalance = await etherscan.getBalance(address);
+  /*
   if (currentBalance === null) {
     console.log("Something went wrong while connecting to API to receive balance.");
     if (message) {
@@ -44,9 +48,7 @@ const runGoerliFaucet = async (message, address, runCustomChecks) => {
     }
     return;
   }
-
   const topUpAmount = maxDepositAmount - (currentBalance);
-
   if(topUpAmount <= 0 ) {
     console.log("Given hex has max deposit amount.");
 
@@ -56,12 +58,13 @@ const runGoerliFaucet = async (message, address, runCustomChecks) => {
       message.lineReply(embed);
     }
     return;
-  }
+  }*/
 
-  console.log("Hex " + address + " is requesting " + topUpAmount/Math.pow(10,18) + " goerli eth.  Custom checks: " + runCustomChecks);
+
+  console.log("Hex " + address + " is requesting " + 32 + " goerli eth.  Custom checks: " + runCustomChecks);
 
   // Make sure the bot has enough Goerli ETH to send
-  const faucetReady = await utils.faucetIsReady(process.env.FAUCET_ADDRESS, (topUpAmount + 1500000000000)/Math.pow(10,18));
+  const faucetReady = await utils.faucetIsReady(process.env.FAUCET_ADDRESS, 32);
   if (!faucetReady) {
     console.log("Faucet does not have enough ETH.");
 
@@ -73,7 +76,7 @@ const runGoerliFaucet = async (message, address, runCustomChecks) => {
     return;
   }
 
-  const receiverEligible = await receiverIsEligible(address, topUpAmount, runCustomChecks);
+  const receiverEligible = await receiverIsEligible(message.author.id, 32, runCustomChecks);
   if (receiverIsEligible === null){
     if (message) {
       embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')

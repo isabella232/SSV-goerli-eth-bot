@@ -54,9 +54,9 @@ exports.setCachedNonce = (nonce) => {
 
 
 // Sending the goerli ETH
-exports.sendGoerliEth = (message, faucetAddress, faucetKey, receiverAddress, amount, nonce, gasPrice) => {
+exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
   console.log("In sendGoerliETH", faucetAddress, faucetKey, receiverAddress);
-  const methodAbi = process.env.METHOD_ABI
+  //const methodAbi = process.env.METHOD_ABI
 
   const transaction = {
     from: FAUCET_ADDRESS,
