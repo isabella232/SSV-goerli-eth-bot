@@ -85,8 +85,8 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
   }
 
   if (!receiverEligible) {
-    const m = runCustomChecks ? message.author.mention + INELIGIBLE_CUSTOM_CHECKS_MESSAGE
-      : message.author.id + INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE;
+    const m = runCustomChecks ? `<@&${message.author.id}> + ${INELIGIBLE_CUSTOM_CHECKS_MESSAGE}
+      `: `<@&${message.author.id}> + ${INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE}`;
 
     console.log(m);
 
