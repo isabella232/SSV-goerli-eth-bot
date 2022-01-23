@@ -22,7 +22,7 @@ pool.query('SELECT NOW()', (err, res) => {
 
 const createTable = `create table if not exists depositortest
 (
-    discordid           varchar not null constraint depositortest_pk primary key,
+    discordid           bigint not null constraint depositortest_pk primary key,
     address             varchar,
     norequests        integer,
     dailycount        real,
@@ -113,13 +113,13 @@ async function setDepositor(discordID){
     const now = new Date();
     const insert = `
         INSERT INTO depositortest 
-            (discordid,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
+            (discordid,address,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
         `
-    const insertVals = [discordID,1,0,0,now,now,now,"",0,""];
+    const insertVals = [discordID,'',1,0,0,now,now,now,"",0,""];
     var result = await pool.query(insert, insertVals);
     result = {
-        discordID,
+        discordid: discordID,
         norequests: 1,
         dailycount: 0,
         weeklycount: 0,
