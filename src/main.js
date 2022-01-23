@@ -57,17 +57,18 @@ bot.on('message', (message) => {
 
     if (args[1].startsWith('0x')){
       if (web3.utils.isHexStrict(args[1])){
-        if (db.checkAddressExists(BigInt(message.author.id))){
-          bot.commands.get('goerliBot').execute(message, args, true);
-        }else if (!db.checkAddressExists(BigInt(message.author.id))){
-          embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
-              .setColor(0xff1100).setTimestamp();
-          message.lineReply(embed);
-        }
-      }else if (web3.utils.isAddress(args[1])){
-        embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
-            .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
+        bot.commands.get('goerliBot').execute(message, args, true);
+      //   if (db.checkAddressExists(BigInt(message.author.id)){
+      //     bot.commands.get('goerliBot').execute(message, args, true);
+      //   }else if (!db.checkAddressExists(BigInt(message.author.id))){
+      //     embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
+      //         .setColor(0xff1100).setTimestamp();
+      //     message.lineReply(embed);
+      //   }
+      // }else if (web3.utils.isAddress(args[1])){
+      //   embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
+      //       .setColor(0xff1100).setTimestamp();
+      //   message.lineReply(embed);
       }else{
         embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
             .setColor(0xff1100).setTimestamp();
