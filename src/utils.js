@@ -77,10 +77,9 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, n
 
         if (message) {
           let embed = new Discord.MessageEmbed()
-              .setDescription(`"**Operation Successful**\nSent ${amount} goerli ETH to ${message.author.mention}
+              .setDescription(`**Operation Successful**\nSent ${amount} goerli ETH to <@&${message.author.id}>
          - please wait a few minutes for it to arrive.
-          [Click here, to check the details at etherscan.io.]
-          (https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
+          To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash}).`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
           message.lineReply(embed);
           let dataToWrite = `${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
           fs.writeFile('txRecords/records.csv', dataToWrite, 'utf8', function (err) {
