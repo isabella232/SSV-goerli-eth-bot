@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({path: '../.env'})
 
 const fs = require('fs');
 const Web3 = require('web3');
@@ -57,6 +57,7 @@ exports.setCachedNonce = (nonce) => {
 exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
   console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
   //const methodAbi = process.env.METHOD_ABI
+  console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
 
   const transaction = {
     from: process.env.FAUCET_ADDRESS,
@@ -72,16 +73,16 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, n
   web3.eth.accounts.signTransaction(transaction, process.env.FAUCET_PRIVATE_KEY)
       .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
       .then(receipt => {
-        console.log("Sent to " + receiverAddress + " transaction receipt: ", receipt)
+        console.log("Sent to " + message.author.id + " transaction receipt: ", receipt)
 
         if (message) {
           let embed = new Discord.MessageEmbed()
-              .setDescription(`"**Operation Successful**\nSent ${amount} goerli ETH to ${receiverAddress}
+              .setDescription(`"**Operation Successful**\nSent ${amount} goerli ETH to ${message.author.mention}
          - please wait a few minutes for it to arrive.
           [Click here, to check the details at etherscan.io.]
           (https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
           message.lineReply(embed);
-          let dataToWrite = `${message.author.id},${new Date()},${hexData},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
+          let dataToWrite = `${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash},\n`;
           fs.writeFile('txRecords/records.csv', dataToWrite, 'utf8', function (err) {
             if (err) {
               console.log('Some error occurred - file either not saved or corrupted file saved.');

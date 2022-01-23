@@ -106,7 +106,7 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
   }
 
   const nonce = utils.getCachedNonce();
-  utils.sendGoerliEth(message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, topUpAmount/Math.pow(10,18), nonce, DEFAULT_GAS_PRICE);
+  utils.sendGoerliEth(message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
   
   await utils.incrementCachedNonce();
 }

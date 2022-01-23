@@ -33,9 +33,9 @@ const createTable = `create table if not exists depositortest
     unaccountedamount real,
     unaccountedtx     varchar
 );`
-const createTable2 = `create table if not exists discordIdAddress(
+const createTable2 = `create table if not exists discordidAddress(
     address varchar not null,
-    discordID bigint not null
+    discordid bigint not null
 )`
 pool.query(createTable2, (err, res) => {
     if(err){
@@ -100,15 +100,15 @@ module.exports = {
     },
     checkAddressExists: async function checkAddressExists(id){
         const select = `
-        SELECT address FROM discordIdAddress 
-        WHERE discordID = $1
+        SELECT address FROM discordidAddress 
+        WHERE discordid = $1
     `;
         const value = [id]
         const result = await pool.query(select, value);
         return result.rows;
     },
     addAddress: function addAddress(discordID, address){
-        const update = 'insert into discordIdAddress(address, discordID) values ($1, $2);'
+        const update = 'insert into discordidAddress(address, discordid) values ($1, $2);'
         const values = [address, discordID]
         pool.query(update, values);
     }
