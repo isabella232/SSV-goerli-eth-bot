@@ -65,10 +65,10 @@ bot.on('message', (message) => {
       //         .setColor(0xff1100).setTimestamp();
       //     message.lineReply(embed);
       //   }
-      // }else if (web3.utils.isAddress(args[1])){
-      //   embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
-      //       .setColor(0xff1100).setTimestamp();
-      //   message.lineReply(embed);
+      }else if (web3.utils.isAddress(args[1])){
+        embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
       }else{
         embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
             .setColor(0xff1100).setTimestamp();
