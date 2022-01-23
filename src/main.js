@@ -27,7 +27,7 @@ const EMBEDDED_HELP_MESSAGE = {
       },
       {
         name: "+goerlieth add <address>",
-        value: "`Adds your address to the database. Please make sure it's correct, you won't be able to modify it later.`"
+        value: "`Adds your address to the database.`"
       }
     ]
   }
@@ -61,13 +61,16 @@ bot.on('message', (message) => {
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
 
+    console.log('Check address exists: ', db.checkAddressExists(BigInt(message.author.id)));
+    console.log('isHexStrict: ', web3.utils.isHexStrict(args[1]));
+
     if (web3.utils.isHexStrict(prefix0x(args[1]) && db.checkAddressExists(BigInt(message.author.id)))){
       bot.commands.get('goerliBot').execute(message, args, true);
     }else if (!db.checkAddressExists(BigInt(message.author.id))){
       embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
           .setColor(0xff1100).setTimestamp();
       message.lineReply(embed);
-    }else{
+    }else if (!web3.utils.isHexStrict(prefix0x(args[1]))){
       embed.setDescription('**Error**\nInvalid `Hex`. Please double check.')
           .setColor(0xff1100).setTimestamp();
       message.lineReply(embed);
