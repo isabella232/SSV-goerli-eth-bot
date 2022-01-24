@@ -15,24 +15,24 @@ const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth. 
 
 const maxDepositAmount = Number(process.env.MAX_DEPOSIT_AMOUNT) 
 
-const runCustomEligibilityChecks = async (hexData, topUpAmount) => {
-  const res = await db.confirmTransaction(hexData, topUpAmount);
+const runCustomEligibilityChecks = async (discordID, address, topUpAmount) => {
+  const res = await db.confirmTransaction(discordID, address, topUpAmount);
   console.log(res)
   return res
 
 }
 
-const receiverIsEligible = async (discordID, amountRequested, runCustomChecks)  => {
+const receiverIsEligible = async (discordID, address, amountRequested, runCustomChecks)  => {
   const needsGoerliEth = true;
   if (runCustomChecks) {
-    const passedCustomChecks = await runCustomEligibilityChecks(discordID, amountRequested);
+    const passedCustomChecks = await runCustomEligibilityChecks(discordID, address, amountRequested);
     return needsGoerliEth && passedCustomChecks;
   } else {
     return needsGoerliEth;
   }
 }
 
-const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
+const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   let embed = new Discord.MessageEmbed();
 
   //Cannot check address balance
@@ -75,7 +75,7 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
     return;
   }
 
-  const receiverEligible = await receiverIsEligible(message.author.id, 32, runCustomChecks);
+  const receiverEligible = await receiverIsEligible(message.author.id, address, 32, runCustomChecks);
   if (receiverEligible === null){
     if (message) {
       embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')
@@ -110,11 +110,10 @@ const runGoerliFaucet = async (message, hexData, runCustomChecks) => {
   if (message) {
     embed.setDescription("**Operation Successful**\nChecks passed - sending...").
     setTimestamp().setColor(3447003);
-    await message.lineReply(embed);
   }
-
+  let msg = await message.lineReply(embed);
   const nonce = utils.getCachedNonce();
-  utils.sendGoerliEth(message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
+  utils.sendGoerliEth(msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
   
   await utils.incrementCachedNonce();
 }
@@ -126,7 +125,7 @@ module.exports = {
   name: 'goerliBot',
   description: 'Sends goerli eth to the user.',
   execute(message, args, runCustomChecks = true) {
-    runGoerliFaucet(message, args[1], runCustomChecks);
+    runGoerliFaucet(message, args[1], args[2], runCustomChecks);
   }
 } 
 

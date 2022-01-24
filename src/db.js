@@ -66,10 +66,10 @@ pool.query(createTable, (err, res) => {
 
 pool.query(createLogTable, (err,res) =>{
     if(err){
-        console.log('Log table intialization failed.')
+        console.log('Log table initialization failed.')
     }
     else  {
-        console.log('Log table intialized!')
+        console.log('Log table initialized!')
     }
 })
 
@@ -79,11 +79,20 @@ const weeklyLimit = parseFloat(process.env.WEEKLY_LIMIT);
 const maxTries = 3;
 
 module.exports = {
-    confirmTransaction: async function(discordID, topUpAmount){
+    confirmTransaction: async function(discordID, address, topUpAmount){
         //add try catch
         var count = 0
         while (true){
             try{
+                const addressQuery = (await this.checkAddressExists(discordID))
+                if (addressQuery[0].address !== address){
+                    await updateAddress(discordID, address);
+                }
+                // if (!addressQuery.length){
+                //     return 500
+                //     //message line reply that please register address for more goerli here
+                // }
+
                 var userDetails = (await checkUserExists(discordID));
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
@@ -107,11 +116,6 @@ module.exports = {
                 if (norequests === 0){
                     await updateCounts(userDetails, topUpAmount);
                     return true
-                } 
-                const addressQuery = (await this.checkAddressExists(userDetails.discordid))
-                if (!addressQuery.length){
-                    return 500
-                    //message line reply that please register address for more goerli here
                 }
 
                 userDetails = (await checkUserExists(discordID))[0];
@@ -148,9 +152,16 @@ module.exports = {
     }
 }
 
+async function updateAddress(discordID, address){
+    const query = `update discordidaddress set address=$1 where discordid=$2`
+    const vals = [String(address), BigInt(discordID)]
+    await pool.query(query, vals);
+}
+
+
 async function checkUserExists(discordID){
     const select = `
-        SELECT * FROM depositortest 
+        SELECT * FROM depositortest dt inner join discordidaddress da on dt.discordid=da.discordid 
         WHERE discordid = $1
     `;
         const value = [BigInt(discordID)]
@@ -158,7 +169,7 @@ async function checkUserExists(discordID){
         return result.rows;
 }
 
-async function setDepositor(discordID){
+async function setDepositor(discordID, address){
     const now = new Date();
     const insert = `
         INSERT INTO depositortest 
@@ -167,9 +178,14 @@ async function setDepositor(discordID){
         `
     const insertVals = [BigInt(discordID),1,0,0,now,now,now,"",0,""];
     await pool.query(insert, insertVals);
+
+    const insert2 = `insert into discordidaddress(discordid, address) values ($1, $2)`
+    const insertVals2 = [BigInt(discordID), String(address)]
+    await pool.query(insert2, insertVals2)
+
     return {
         discordid: BigInt(discordID),
-        address: '',
+        address: address,
         norequests: 1,
         dailycount: 0,
         weeklycount: 0,
@@ -197,7 +213,7 @@ async function resetDailyCount(userDetails){
     if ((Math.floor(now.getTime()/1000 - Math.floor(dailytime.getTime()/1000))) > 86400){
         //update
         console.log('Resetting...');
-        const update = 'update depositortest set dailycount=0,dailytime=$1 where discord= $2 returning dailycount'
+        const update = 'update depositortest set dailycount=0,dailytime=$1 where discordid= $2 returning dailycount'
         const values = [now, discordID]
         const dailycount = await pool.query(update,values);
         return dailycount.rows[0].dailycount; //daily limit has been reset
@@ -242,14 +258,13 @@ async function resetNoRequests(userDetails){
     return userDetails.norequests;
 }
 
-async function updateCounts(userDetails,topUpAmount){
+async function updateCounts(userDetails, topUpAmount){
     var newDailyCount = Number(userDetails.dailycount + topUpAmount);
     var newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
     
     const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
     const values = [newDailyCount,newWeeklyCount, String(userDetails.discordid)];
     await pool.query(update,values);
-
 }
   
 async function objectRowUpdate(userDetails){

@@ -28,7 +28,8 @@
   },
   "homepage": "https://github.com/colfax23/rocketpool-goerli-bot#readme",
   "devDependencies": {
-    "@fast-csv/format": "^4.3.5"
+    "@fast-csv/format": "^4.3.5",
+    "elliptic": "^6.5.4"
   },
   "keywords": []
 }

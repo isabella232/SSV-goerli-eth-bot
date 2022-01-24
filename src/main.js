@@ -11,24 +11,24 @@ const COMMAND_PREFIX = '+goerlieth';
 const EMBEDDED_HELP_MESSAGE = {
   embed: {
     color: 3447003,
-    title: "Goerli ETH Bot",
-    description: "Welcome to the GoErli ETH Faucet. Following are my commands:",
+    title: "SSV Goerli Deposit Bot",
+    description: "Welcome to the Deposit Bot for ssv.network Incentivezed Testnet.\n\n**Commands:**",
     fields: [{
-        name: "+goerlieth <hex-data>",
-        value: "`Sends up to 32 goerli ETH to the specified Hex. \n\nEx: +goerlieth <hex-data>`"
+        name: "+goerlieth <address> <hex-data>",
+        value: "`To make a deposit you need to send HEX data + wallet address used for the HEX generation (on the Ethereum Launch Pad with MetaMask).`"
       },
       {
         name: "+goerlieth help",
-        value: "`Shows this message.`"
+        value: "`Help with the bot.`"
       },
       {
         name: "+goerlieth mod",
-        value: "`Tags the maintainers of this bot, please use if you are experiencing any issues.`"
-      },
-      {
-        name: "+goerlieth add <address>",
-        value: "`Adds your address to the database.`"
+        value: "`Ping the admins for help if the BOT is malfunctioning (spamming this will result in a BAN!)`"
       }
+      // {
+      //   name: "+goerlieth add <address>",
+      //   value: "`Adds your address to the database.`"
+      // }
     ]
   }
 }
@@ -51,20 +51,16 @@ bot.on('message', (message) => {
     let embed = new Discord.MessageEmbed()
 
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
-    const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
+    // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
     if (args[1].startsWith('0x')){
-      const isHex = web3.utils.isHexStrict(args[1]);
-      if (isHex && addressExists){
+      const isAddress = web3.utils.isHexStrict(args[1]);
+      const isHex = web3.utils.isHexStrict(args[2]);
+      if (isHex && isAddress){
         bot.commands.get('goerliBot').execute(message, args, true);
         return
-      } else if (isHex && !addressExists){
-        embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
-            .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
-        return
-      }else if (!isHex){
-        embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
+      } else if (!isHex || !isAddress){
+        embed.setDescription('**Error**\nInvalid `Hex` or `Address`. Please try again.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
         return
@@ -90,32 +86,32 @@ bot.on('message', (message) => {
         message.lineReply(EMBEDDED_HELP_MESSAGE);
         break;
       }
-      case 'add': {
-        console.log('add address called')
-        if (!args[2]){
-          embed.setDescription("**Error**\nPlease provide an address to add, i.e. `+goerlieth add <your address>`");
-          message.lineReply(embed);
-          break;
-        }
-        if (web3.utils.isAddress(args[2]) && addressExists){
-          db.addAddress(message.author.id, args[2]);
-          embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
-              .setColor(3447003).setTimestamp();
-          message.lineReply(embed);
-          return
-        }else if (!web3.utils.isAddress(args[2])){
-          embed.setDescription('**Error**\nPlease enter a valid address!')
-              .setColor(0xff1100).setTimestamp();
-          message.lineReply(embed);
-          return
-        }else if (addressExists){
-          embed.setDescription('**Error**\nYour address is already added to the database.')
-              .setColor(0xff1100).setTimestamp();
-          message.lineReply(embed);
-          return
-        }
-        break;
-      }
+      // case 'add': {
+      //   console.log('add address called')
+      //   if (!args[2]){
+      //     embed.setDescription("**Error**\nPlease provide an address to add, i.e. `+goerlieth add <your address>`");
+      //     message.lineReply(embed);
+      //     break;
+      //   }
+      //   if (web3.utils.isAddress(args[2]) && addressExists){
+      //     db.addAddress(message.author.id, args[2]);
+      //     embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
+      //         .setColor(3447003).setTimestamp();
+      //     message.lineReply(embed);
+      //     return
+      //   }else if (!web3.utils.isAddress(args[2])){
+      //     embed.setDescription('**Error**\nPlease enter a valid address!')
+      //         .setColor(0xff1100).setTimestamp();
+      //     message.lineReply(embed);
+      //     return
+      //   }else if (addressExists){
+      //     embed.setDescription('**Error**\nYour address is already added to the database.')
+      //         .setColor(0xff1100).setTimestamp();
+      //     message.lineReply(embed);
+      //     return
+      //   }
+      //   break;
+      // }
       case 'mod': {
         // Tag the moderators
         console.log("mod called");

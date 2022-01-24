@@ -54,7 +54,7 @@ exports.setCachedNonce = (nonce) => {
 
 
 // Sending the goerli ETH
-exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
+exports.sendGoerliEth = (prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
   console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
   //const methodAbi = process.env.METHOD_ABI
   console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
@@ -80,7 +80,7 @@ exports.sendGoerliEth = (message, faucetAddress, faucetKey, methodAbi, amount, n
               .setDescription(`**Operation Successful**\nSent ${amount} goerli ETH to <@!${message.author.id}>
          - please wait a few minutes for it to arrive.
           To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
-          message.lineReply(embed);
+          prevMsg.edit(embed);
           let dataToWrite = fs.readFileSync('../src/txRecords/records.csv', 'utf8') + `\n${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
           fs.writeFile('../src/txRecords/records.csv', dataToWrite, 'utf8', function (err) {
             if (err) {
