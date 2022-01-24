@@ -83,7 +83,7 @@ module.exports = {
                 }
                 userDetails = userDetails[0];
                 if (userDetails.address !== address){
-                    await updateAddress(discordid,address)
+                    await updateAddress(discordID, address)
                     userDetails.address = address
                 }
                 //refresh daily limit and weekly limit 
