@@ -4,7 +4,7 @@ const fs = require('fs');
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
 const Discord = require('discord.js');
-
+const db = require('db.js');
 // Eth
 exports.getAddressTransactionCount = async (address) => {
   const nonce = await web3.eth.getTransactionCount(address);
@@ -54,7 +54,7 @@ exports.setCachedNonce = (nonce) => {
 
 
 // Sending the goerli ETH
-exports.sendGoerliEth = (prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
+exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
   console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
   //const methodAbi = process.env.METHOD_ABI
   console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
@@ -77,18 +77,11 @@ exports.sendGoerliEth = (prevMsg, message, faucetAddress, faucetKey, methodAbi, 
 
         if (message) {
           let embed = new Discord.MessageEmbed()
-              .setDescription(`**Operation Successful**\nSent ${amount} goerli ETH to <@!${message.author.id}>
-         - please wait a few minutes for it to arrive.
-          To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`).setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
+              .setDescription(`**Operation Successful**\nSent ${amount} goerli ETH to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at etherscan.io, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
+              .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
           prevMsg.edit(embed);
-          let dataToWrite = fs.readFileSync('../src/txRecords/records.csv', 'utf8') + `\n${message.author.id},${new Date()},${methodAbi},${receipt.transactionHash},https://goerli.etherscan.io/tx/${receipt.transactionHash}`;
-          fs.writeFile('../src/txRecords/records.csv', dataToWrite, 'utf8', function (err) {
-            if (err) {
-              console.log("Error in write to CSV: ", err);
-            } else{
-              console.log('Successfully written records to CSV file!');
-            }
-          });
+          db.addLog(message.author.id, message.author.username,
+              `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, address);
         }
       })
       .catch(err => {

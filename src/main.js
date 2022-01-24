@@ -53,18 +53,24 @@ bot.on('message', (message) => {
     // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
     if (args[1].startsWith('0x')){
+      if (!args[1] || !args[2]){
+        embed.setDescription('**Error**\nInvalid number of arguments. Please try again.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+        return
+      }
       const isAddress = web3.utils.isHexStrict(args[1]);
       const isHex = web3.utils.isHexStrict(args[2]);
       if (isHex && isAddress){
         bot.commands.get('goerliBot').execute(message, args, true);
         return
       } else if(!isAddress){
-        embed.setDescription('**Error**\nInvalid `Address`. Please try again.')
+        embed.setDescription('**Error**\nInvalid `Address`.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
         return
       }else if (!isHex){
-        embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
+        embed.setDescription('**Error**\nInvalid `Hex`.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
         return
