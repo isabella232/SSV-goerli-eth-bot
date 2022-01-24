@@ -162,7 +162,7 @@ async function updateAddress(discordID, address){
 async function checkUserExists(discordID){
     const select = `
         SELECT * FROM depositortest dt inner join discordidaddress da on dt.discordid=da.discordid 
-        WHERE discordid = $1
+        WHERE dt.discordid = $1
     `;
         const value = [BigInt(discordID)]
         const result = await pool.query(select, value);
