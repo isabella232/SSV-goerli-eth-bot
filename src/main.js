@@ -54,16 +54,25 @@ bot.on('message', (message) => {
     const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
     if (args[1].startsWith('0x')){
-      if (web3.utils.isHexStrict(args[1])){
+      const isHex = web3.utils.isHexStrict(args[1]);
+      if (isHex && addressExists){
         bot.commands.get('goerliBot').execute(message, args, true);
-      }else if (web3.utils.isAddress(args[1])){
-        embed.setDescription('**Error**\nPlease use hex data, not your address. Refer to the guide on how to get hex data.')
+        return
+      } else if (isHex && !addressExists){
+        embed.setDescription('**Error**\nPlease add your address first using `+goerlieth add <address>`.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
-      }else{
+        return
+      }else if (!isHex){
         embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
+        return
+      }else{
+        embed.setDescription('**Error**\nUnknown error occurred.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+        return
       }
     }
 
@@ -93,14 +102,17 @@ bot.on('message', (message) => {
           embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
               .setColor(3447003).setTimestamp();
           message.lineReply(embed);
+          return
         }else if (!web3.utils.isAddress(args[2])){
           embed.setDescription('**Error**\nPlease enter a valid address!')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
+          return
         }else if (addressExists){
           embed.setDescription('**Error**\nYour address is already added to the database.')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
+          return
         }
         break;
       }
