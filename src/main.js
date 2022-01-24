@@ -7,30 +7,11 @@ const bot = new Discord.Client();
 const web3 = require('web3');
 require('./db');
 const COMMAND_PREFIX = '+goerlieth';
-const EMBEDDED_HELP_MESSAGE = {
-  embed: {
-    color: 3447003,
-    title: "SSV Goerli Deposit Bot",
-    description: "Welcome to the Deposit Bot for ssv.network Incentivezed Testnet.\n\n**Commands:**",
-    fields: [{
-        name: "+goerlieth <address> <hex-data>",
-        value: "`To make a deposit you need to send HEX data + wallet address (on the Ethereum Launch Pad with MetaMask).`"
-      },
-      {
-        name: "+goerlieth help",
-        value: "`Help with the bot.`"
-      },
-      {
-        name: "+goerlieth mod",
-        value: "`Ping the admins for help if the BOT is malfunctioning (spamming this will result in a BAN!)`"
-      }
-      // {
-      //   name: "+goerlieth add <address>",
-      //   value: "`Adds your address to the database.`"
-      // }
-    ]
-  }
-}
+const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle('SSV Goerli Deposit Bot').setColor(3447003)
+    .setDescription("Welcome to the Deposit Bot for **ssv.network Incentivezed Testnet**.\nThis **BOT** will make a **32 goerli** deposit to your validator.\n\n**BOT rules:**\n**1.**\nOne message can be sent every 6 hours, please make sure to read and understand how the bot works before you continue.\n**2.**\n Each user is entitled to 1 deposit per 24 hours.\n**3.**\nTrying to abuse the bot will result in a **ban**, **disqualification** from the testnet and **block**.\n\n**To generate HEX data for your deposit:**\n**1.**\nGet to the validator deposit stage on: https://prater.launchpad.ethereum.org/en/overview and change `disabled` to `enabled` by `inspecting` the button (on the launchpad page)https://i.imgur.com/izYw5QU.gif\n**2.**\n On the send deposit page - once Metamask is open, open the Data page and copy the Hex Data. https://i.imgur.com/2XGOT9H.gif. Now move to Discord Bot Channel.\n\n**Guide:**")
+    .addField("+goerlieth <address> <hex-data>", 'To start you need to register the wallet address you used to generate the **hex** and the **hex** itself.')
+    .addField("+goerlieth help", 'Help with the bot.')
+    .addField("+goerlieth mod", "Ping the admins for help if the **BOT** is malfunctioning (spamming this will result in a **BAN**)")
 
 let yourBotToken = process.env.DISCORD_BOT_TOKEN;
 bot.login(yourBotToken);
@@ -93,6 +74,8 @@ bot.on('message', (message) => {
       // Other commands
       case 'help': {
         console.log("help called");
+        const attachment = new Discord.MessageAttachment('./img.png', 'img.png');
+        EMBEDDED_HELP_MESSAGE.attachFiles(attachment).setImage('attachment://img.png');
         message.lineReply(EMBEDDED_HELP_MESSAGE);
         break;
       }
