@@ -37,6 +37,16 @@ const createTable2 = `create table if not exists discordidaddress(
     address varchar not null,
     discordid bigint not null
 )`
+
+const createLogTable = `create table if not exists txlogs(
+    discord_id bigint,
+    discord_name varchar,
+    etherscan_link varchar,
+    deposit_abi varchar,
+    created_at timestamp,
+)
+`
+
 pool.query(createTable2, (err, res) => {
     if(err){
         console.log('discordIdAddress table creation failed',err);
@@ -53,6 +63,15 @@ pool.query(createTable, (err, res) => {
         console.log('depositor table created!');
     }
 });
+
+pool.query(createLogTable, (err,res) =>{
+    if(err){
+        console.log('Log table intialization failed.')
+    }
+    else  {
+        console.log('Log table intialized!')
+    }
+})
 
 const depositAmount = process.env.DEPOSIT_AMOUNT; //should be 32000000000000000000
 const dailyLimit = parseFloat(process.env.DAILY_LIMIT);
@@ -108,17 +127,24 @@ module.exports = {
     checkAddressExists: async function(id){
         const select = `
         SELECT address FROM discordidaddress 
-        WHERE discordid = $1
-    `;
+        WHERE discordid = $1`;
+
         const value = [id]
-        pool.query(select, value).then(function (result){
-            return result.rows[0]
-        });
+        const result = await pool.query(select, value);
+        console.log(result)
+        return result.rows;
     },
     addAddress: function (discordID, address){
         const update = 'insert into discordidaddress(address, discordid) values ($1, $2);'
         const values = [address, discordID]
         pool.query(update, values);
+    },
+    addLog: async function(discord_id, discord_name, etherscan_link, deposit_abi){
+        const now = new Date();
+        const insert =   `INSERT INTO txlogs
+                        (discord_id,discord_name,etherscan_link,deposit_abi,created_at) VALUES ($1,$2,$3,$4,$5);`
+        const values = [discord_id,discord_name,etherscan_link,deposit_abi,now];
+        await pool.query(insert,values);
     }
 }
 
