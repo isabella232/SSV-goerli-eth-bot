@@ -40,7 +40,7 @@ const createLogTable = `create table if not exists txlogs(
     discord_name varchar,
     etherscan_link varchar,
     deposit_abi varchar,
-    created_at timestamp,
+    created_at timestamp
 )
 `
 

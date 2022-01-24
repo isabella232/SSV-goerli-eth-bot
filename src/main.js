@@ -5,8 +5,7 @@ const goerliBot = require('./goerliBot.js');
 require('discord-reply');
 const bot = new Discord.Client();
 const web3 = require('web3');
-const db = require('./db')
-
+require('./db');
 const COMMAND_PREFIX = '+goerlieth';
 const EMBEDDED_HELP_MESSAGE = {
   embed: {
@@ -15,7 +14,7 @@ const EMBEDDED_HELP_MESSAGE = {
     description: "Welcome to the Deposit Bot for ssv.network Incentivezed Testnet.\n\n**Commands:**",
     fields: [{
         name: "+goerlieth <address> <hex-data>",
-        value: "`To make a deposit you need to send HEX data + wallet address used for the HEX generation (on the Ethereum Launch Pad with MetaMask).`"
+        value: "`To make a deposit you need to send HEX data + wallet address (on the Ethereum Launch Pad with MetaMask).`"
       },
       {
         name: "+goerlieth help",
@@ -59,8 +58,13 @@ bot.on('message', (message) => {
       if (isHex && isAddress){
         bot.commands.get('goerliBot').execute(message, args, true);
         return
-      } else if (!isHex || !isAddress){
-        embed.setDescription('**Error**\nInvalid `Hex` or `Address`. Please try again.')
+      } else if(!isAddress){
+        embed.setDescription('**Error**\nInvalid `Address`. Please try again.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+        return
+      }else if (!isHex){
+        embed.setDescription('**Error**\nInvalid `Hex`. Please try again.')
             .setColor(0xff1100).setTimestamp();
         message.lineReply(embed);
         return
