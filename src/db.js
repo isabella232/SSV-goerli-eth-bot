@@ -105,7 +105,7 @@ module.exports = {
             }
         }
     },
-    checkAddressExists: async function checkAddressExists(id){
+    checkAddressExists: async function(id){
         const select = `
         SELECT address FROM discordidaddress 
         WHERE discordid = $1
@@ -115,7 +115,7 @@ module.exports = {
             return result.rows[0]
         });
     },
-    addAddress: function addAddress(discordID, address){
+    addAddress: function (discordID, address){
         const update = 'insert into discordidaddress(address, discordid) values ($1, $2);'
         const values = [address, discordID]
         pool.query(update, values);
