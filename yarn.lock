@@ -954,14 +954,6 @@
     "idna-uts46-hx" "^2.3.1"
     "js-sha3" "^0.5.7"
 
-"eth-key-pair@~1.0.1":
-  "integrity" "sha512-4soASRRJoweB+cxLrUd+0F5UhmEDhwxkyRXnsC7UKWKe1zCY9Qkh40EinARTdUmmXo7erM3u8mOk5qgrOxyB+A=="
-  "resolved" "https://registry.npmjs.org/eth-key-pair/-/eth-key-pair-1.0.1.tgz"
-  "version" "1.0.1"
-  dependencies:
-    "scrypt-js" "^3.0.0"
-    "secp256k1" "^4.0.0"
-
 "eth-lib@^0.1.26":
   "integrity" "sha512-bfttrr3/7gG4E02HoWTDUcDDslN003OlOoBxk9virpAZQ1ja/jDgwkWB8QfJF7ojuEowrqy+lzp9VcJG7/k5bQ=="
   "resolved" "https://registry.npmjs.org/eth-lib/-/eth-lib-0.1.29.tgz"
@@ -2277,7 +2269,7 @@
   "resolved" "https://registry.npmjs.org/scrypt-js/-/scrypt-js-3.0.1.tgz"
   "version" "3.0.1"
 
-"secp256k1@^4.0.0", "secp256k1@^4.0.1":
+"secp256k1@^4.0.1":
   "integrity" "sha512-UDar4sKvWAksIlfX3xIaQReADn+WFnHvbVujpcbr+9Sf/69odMwy2MUsz5CKLQgX9nsIyrjuxL2imVyoNHa3fg=="
   "resolved" "https://registry.npmjs.org/secp256k1/-/secp256k1-4.0.2.tgz"
   "version" "4.0.2"

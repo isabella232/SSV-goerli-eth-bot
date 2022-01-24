@@ -129,12 +129,12 @@ async function updateAddress(discordID, address){
 
 async function checkUserExists(discordID){
     const select = `
-        SELECT * FROM depositortest dt inner join discordidaddress da on dt.discordid=da.discordid 
-        WHERE dt.discordid = $1
+        SELECT * FROM depositortest
+        WHERE discordid = $1
     `;
-        const value = [BigInt(discordID)]
-        const result = await pool.query(select, value);
-        return result.rows;
+    const value = [BigInt(discordID)]
+    const result = await pool.query(select, value);
+    return result.rows;
 }
 
 async function setDepositor(discordID, address){
@@ -146,11 +146,6 @@ async function setDepositor(discordID, address){
         `
     const insertVals = [BigInt(discordID),address,1,0,0,now,now,now,"",0,""];
     await pool.query(insert, insertVals);
-
-    const insert2 = `insert into discordidaddress(discordid, address) values ($1, $2)`
-    const insertVals2 = [BigInt(discordID), String(address)]
-    await pool.query(insert2, insertVals2)
-
     return {
         discordid: BigInt(discordID),
         address: address,
