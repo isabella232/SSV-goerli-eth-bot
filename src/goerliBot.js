@@ -82,6 +82,7 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
           .setTimestamp().setColor(3447003);
       await message.lineReply(embed);
     }
+    return;
   }
   if (receiverEligible === 500){
     if (message) {

@@ -23,6 +23,7 @@ pool.query('SELECT NOW()', (err, res) => {
 const createTable = `create table if not exists depositortest
 (
     discordid         bigint not null constraint depositortest_pk primary key,
+    address           varchar,
     norequests        integer,
     dailycount        real,
     weeklycount       real,
@@ -33,10 +34,6 @@ const createTable = `create table if not exists depositortest
     unaccountedamount real,
     unaccountedtx     varchar
 );`
-const createTable2 = `create table if not exists discordidaddress(
-    address varchar not null,
-    discordid bigint not null
-)`
 
 const createLogTable = `create table if not exists txlogs(
     discord_id bigint,
@@ -47,14 +44,6 @@ const createLogTable = `create table if not exists txlogs(
 )
 `
 
-pool.query(createTable2, (err, res) => {
-    if(err){
-        console.log('discordIdAddress table creation failed',err);
-    }
-    else {
-        console.log('discordIdAddress table created!');
-    }
-});
 pool.query(createTable, (err, res) => {
     if(err){
         console.log('depositor table creation failed',err);
@@ -84,15 +73,6 @@ module.exports = {
         var count = 0
         while (true){
             try{
-                const addressQuery = (await this.checkAddressExists(discordID))
-                if (addressQuery[0].address !== address){
-                    await updateAddress(discordID, address);
-                }
-                // if (!addressQuery.length){
-                //     return 500
-                //     //message line reply that please register address for more goerli here
-                // }
-
                 var userDetails = (await checkUserExists(discordID));
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
@@ -102,6 +82,10 @@ module.exports = {
                     return true
                 }
                 userDetails = userDetails[0];
+                if (userDetails.address !== address){
+                    await updateAddress(discordid,address)
+                    userDetails.address = address
+                }
                 //refresh daily limit and weekly limit 
                 //check daily limit and weekly limit
                 //If either are reached reject transaction
@@ -128,21 +112,6 @@ module.exports = {
             }
         }
     },
-    checkAddressExists: async function(id){
-        const select = `
-        SELECT address FROM discordidaddress 
-        WHERE discordid = $1`;
-
-        const value = [id]
-        const result = await pool.query(select, value);
-        console.log(result)
-        return result.rows;
-    },
-    addAddress: function (discordID, address){
-        const update = 'insert into discordidaddress(address, discordid) values ($1, $2);'
-        const values = [address, discordID]
-        pool.query(update, values);
-    },
     addLog: async function(discord_id, discord_name, etherscan_link, deposit_abi){
         const now = new Date();
         const insert =   `INSERT INTO txlogs
@@ -153,11 +122,10 @@ module.exports = {
 }
 
 async function updateAddress(discordID, address){
-    const query = `update discordidaddress set address=$1 where discordid=$2`
+    const query = `update depositertest set address=$1 where discordid=$2`
     const vals = [String(address), BigInt(discordID)]
     await pool.query(query, vals);
 }
-
 
 async function checkUserExists(discordID){
     const select = `
@@ -173,8 +141,8 @@ async function setDepositor(discordID, address){
     const now = new Date();
     const insert = `
         INSERT INTO depositortest 
-            (discordid,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);
+            (discordid,address,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
         `
     const insertVals = [BigInt(discordID),1,0,0,now,now,now,"",0,""];
     await pool.query(insert, insertVals);
