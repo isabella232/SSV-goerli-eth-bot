@@ -53,7 +53,7 @@ pool.query(createTable, (err, res) => {
     }
 });
 
-pool.query(createLogTable, (err,res) =>{
+pool.query(createLogTable, (err, res) =>{
     if(err){
         console.log('Log table initialization failed.')
     }
@@ -77,7 +77,7 @@ module.exports = {
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
                 if (!userDetails.length){
-                    const userDetails = await setDepositor(discordID);
+                    const userDetails = await setDepositor(discordID, address);
                     await updateCounts(userDetails, topUpAmount);
                     return true
                 }
