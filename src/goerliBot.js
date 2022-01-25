@@ -58,9 +58,26 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
     }
     return;
   }
-  if (receiverEligible === 500){
+  if (receiverEligible === 401){
+    //Daily of goerli recieved
+    const m = `**Operation Unsuccesful**\n<@!${message.author.id}> has reached their daily quota of goerliETH.`;
+    console.log(m);
     if (message) {
-      embed.setDescription('**Error**\nPlease register your address using +goerlieth add command.')
+      embed.setDescription(m)
+          .setTimestamp().setColor(3447003);
+      await message.lineReply(embed);
+    }
+    return;
+  }
+
+  if (receiverEligible === 402){
+    //Weekly quota of goerli reached
+    const m = `**Operation Unsuccesful**\n<@!${message.author.id}> has reached their weekly quota of goerliETH.`;
+
+    console.log(m);
+
+    if (message) {
+      embed.setDescription(m)
           .setTimestamp().setColor(3447003);
       await message.lineReply(embed);
     }
@@ -68,8 +85,7 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   }
 
   if (!receiverEligible) {
-    const m = runCustomChecks ? `**Operation Unsuccessful**\n<@!${message.author.id}>${INELIGIBLE_CUSTOM_CHECKS_MESSAGE}`
-        : `**Operation Unsuccessful**\n<@!${message.author.id}>${INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE}`;
+    const m = `**Operation Unsuccesful**\n<@!${message.author.id}> is ineligible to recieve goerliETH. Please ensure that you request goerliETH within the limits and pass the custom checks.`;
 
     console.log(m);
 
@@ -89,7 +105,7 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   let msg = await message.lineReply(embed);
   const nonce = utils.getCachedNonce();
   utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
-  
+
   await utils.incrementCachedNonce();
 }
 
