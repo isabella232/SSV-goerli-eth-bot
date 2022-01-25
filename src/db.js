@@ -92,10 +92,10 @@ module.exports = {
                 //check daily limit and weekly limit
                 //If either are reached reject transaction
                 if (!(await checkDailyLimit(userDetails))){
-                    return false;
+                    return 401;
                 }
                 if (!(await checkWeeklyLimit(userDetails))){
-                    return false;
+                    return 402;
                 }
                 //refresh norequests
                 const norequests = await resetNoRequests(userDetails);
@@ -125,7 +125,7 @@ module.exports = {
                 await pool.query(insert,values);
                 return true
             } catch (e) {
-                if (++count == maxTries) return false;
+                if (++count == maxTries) return;
             }
         } 
     }
