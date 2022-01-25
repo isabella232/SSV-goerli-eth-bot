@@ -30,7 +30,7 @@ bot.on('message', (message) => {
 
     let embed = new Discord.MessageEmbed()
 
-    const args = (message.content.substring(COMMAND_PREFIX.length).split(" ")).filter(n=>n)
+    const args = (message.content.substring(COMMAND_PREFIX.length).split(/ |\n/)).filter(n=>n)
     // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
     if (args[0] && args[1] && args[0].startsWith('0x') && args[1].startsWith('0x')){
