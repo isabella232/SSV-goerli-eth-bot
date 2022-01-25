@@ -1,24 +1,33 @@
-// const web3 = require("web3");
-// const keccak256 = require('js-sha3').keccak256;
-// //0x6a4F8E577BB6F3b1aed131C67002C2A64Eb0A0fD
-// async function main() {
-//     try {
-//         const pubKey = 'a9c4b5eceda939dccdb8952ac62a2ae5b80841f5224a0947ab0e700b9153b86bde8ad371801e5ea17ad710b97f0aa480';
-//         const address = keccak256(Buffer.from(pubKey, 'hex')).slice(64 - 40);
-//         // const address = keccak256(pubKey).slice(64-40);
-//         console.log(`Public Key: ${pubKey}`);
-//         console.log(`Address: 0x${address.toString()}`);
-//         console.log(web3.utils.isAddress(address.toString()));
-//     } catch (err) {
-//         console.log(err);
-//     }
-// }
-//
-// main();
 
-const web3 = require('web3')
-const COMMAND_PREFIX = '+goerlieth';
+require('dotenv').config({path: '../.env'})
+//const { checkDeposit } = require('./api.js');
+const { Pool } = require('pg');
+//const { max } = require('pg/lib/defaults');
 
-let arr = ("+goerlieth  0x00e73f37256a52cced1a343b12735f4317d5359f  0x22895118000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000000000000000000000000000000000000000000120786b757e5db893a78a8180f8fb41ed4b9c2711192682f82ed5c5782821d1f1a7000000000000000000000000000000000000000000000000000000000000003084d8deaf124ba2923d7f74caf3b30e303dcf7ced457fef82894ec40659032a2e37d9ac2892beab108a90bd0e823a20b700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000f990af84223f65eb43d8fb1fe9c7dbf66fe018f5574f6ad4d9ebe0ecef0b350000000000000000000000000000000000000000000000000000000000000060b17b925a9424206c131ebe476588d4a93b7d427f6d557ffd55b4ddd07a81a863b98e03a1626c41ea187c0f61ff3d7a8304a18a80c3e310740c6e077317a9fe2c42f10e6d155f6cf6339aed23f25ef54db39785b35998f026a36dcd784f5edc40".substring(COMMAND_PREFIX.length).split(" ")).filter(n=>n)
-console.log(arr)
-console.log(arr.length)
+let pool = new Pool({
+  user: process.env.DB_USERNAME,
+  host: process.env.DB_HOST,
+  database: process.env.DB_DATABASE,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT,
+})
+pool.connect();
+
+const createLogTable = `create table if not exists txlogs(
+    discord_id bigint,
+    discord_name varchar,
+    pub_key    varchar,
+    etherscan_link varchar,
+    deposit_abi varchar,
+    created_at timestamp
+)
+`
+
+pool.query(createLogTable, (err, res) =>{
+    if(err){
+        console.log('Log table initialization failed.')
+    }
+    else  {
+        console.log('Log table initialized!')
+    }
+})

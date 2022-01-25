@@ -1,6 +1,7 @@
 require('dotenv').config({path: '../.env'})
 const { checkDeposit } = require('./api.js');
 const { Pool } = require('pg');
+const { max } = require('pg/lib/defaults');
 
 let pool = new Pool({
   user: process.env.DB_USERNAME,
@@ -37,9 +38,10 @@ const createTable = `create table if not exists depositortest
 
 const createLogTable = `create table if not exists txlogs(
     discord_id bigint,
-    address    varchar,
     discord_name varchar,
+    pub_key    varchar,
     etherscan_link varchar,
+    deposit_abi varchar,
     created_at timestamp
 )
 `
@@ -112,12 +114,20 @@ module.exports = {
             }
         }
     },
-    addLog: async function(discord_id, discord_name, etherscan_link, address){
-        const now = new Date();
-        const insert =   `INSERT INTO txlogs
-                        (discord_id,discord_name,etherscan_link,address,created_at) VALUES ($1,$2,$3,$4,$5);`
-        const values = [discord_id,discord_name,etherscan_link,address,now];
-        await pool.query(insert,values);
+    addLog: async function(discord_id, discord_name,pubKey, etherscan_link, deposit_abi){
+        var count = 0;
+        while (true) {
+            try {
+                const now = new Date();
+                const insert =   `INSERT INTO txlogs
+                                (discord_id,discord_name,pub_key,etherscan_link,deposit_abi,created_at) VALUES ($1,$2,$3,$4,$5,$6);`
+                const values = [discord_id,discord_name,pubKey,etherscan_link,deposit_abi,now];
+                await pool.query(insert,values);
+                return true
+            } catch (e) {
+                if (++count == maxTries) return false;
+            }
+        } 
     }
 }
 

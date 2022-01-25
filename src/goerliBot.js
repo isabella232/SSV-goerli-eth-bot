@@ -34,32 +34,6 @@ const receiverIsEligible = async (discordID, address, amountRequested, runCustom
 
 const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   let embed = new Discord.MessageEmbed();
-
-  //Cannot check address balance
-
-  //const currentBalance = await etherscan.getBalance(address);
-  /*
-  if (currentBalance === null) {
-    console.log("Something went wrong while connecting to API to receive balance.");
-    if (message) {
-      embed.setDescription("**Error**\nSomething went wrong while getting hex details please try again.").
-      setTimestamp().setColor(0xff1100);
-      message.lineReply(embed)
-    }
-    return;
-  }
-  const topUpAmount = maxDepositAmount - (currentBalance);
-  if(topUpAmount <= 0 ) {
-    console.log("Given hex has max deposit amount.");
-
-    if (message) {
-      embed.setDescription("**Operation Unsuccessful**\nGiven Hex has max deposit amount.").
-      setTimestamp().setColor(0xff1100);
-      message.lineReply(embed);
-    }
-    return;
-  }*/
-
   console.log("DiscordID " + message.author.id + " is requesting " + 32 + " goerli eth.  Custom checks: " + runCustomChecks);
 
   // Make sure the bot has enough Goerli ETH to send

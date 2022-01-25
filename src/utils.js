@@ -1,10 +1,13 @@
 require('dotenv').config({path: '../.env'})
-
+const abiDecoder = require('abi-decoder');
 const fs = require('fs');
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
 const Discord = require('discord.js');
 const db = require('./db');
+const contractABI = require('../contract-abi.json')
+abiDecoder.addABI(contractABI);
+
 // Eth
 exports.getAddressTransactionCount = async (address) => {
   const nonce = await web3.eth.getTransactionCount(address);
@@ -80,8 +83,14 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
               .setDescription(`**Operation Successful**\nSent **${amount} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
               .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
           prevMsg.edit(embed);
-          db.addLog(message.author.id, message.author.username,
-              `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, address);
+          
+          try {
+            const decodedHexData = abiDecoder.decodeMethod(methodAbi);
+            const pubKey = decodedHexData.params[0].value;
+            db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData));
+          } catch (e) {
+            console.log(e);
+          }
         }
       })
       .catch(err => {
