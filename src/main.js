@@ -33,14 +33,21 @@ bot.on('message', (message) => {
     const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
     // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
-    if (args[1].startsWith('0x')){
-      if (!args[1] || !args[2]){
-        embed.setDescription('**Error**\nInvalid number of arguments. Please try again.')
-            .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
-        return
+    if (args[1].startsWith('0x') && args[2].startsWith('0x')){
+      if (!args[2]){
+        if (args[1] && web3.utils.isHex(args[1])){
+          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` first then your `hex`.')
+              .setColor(0xff1100).setTimestamp();
+          message.lineReply(embed);
+          return
+        }else if (args[1] && web3.utils.isAddress(args[1])){
+          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` after the `address`.')
+              .setColor(0xff1100).setTimestamp();
+          message.lineReply(embed);
+          return
+        }
       }
-      const isAddress = web3.utils.isHexStrict(args[1]);
+      const isAddress = web3.utils.isAddress(args[1]);
       const isHex = web3.utils.isHexStrict(args[2]);
       if (isHex && isAddress){
         bot.commands.get('goerliBot').execute(message, args, true);
