@@ -105,7 +105,7 @@ module.exports = {
                 }
 
                 userDetails = (await checkUserExists(discordID))[0];
-                userDetails.address = addressQuery[0].address;
+                // userDetails.address = addressQuery[0].address;
                 //noRequests > 1 now we have to validate that the user has sent 32 eth to the wallet
                 return await validateTransaction(userDetails, topUpAmount);
             } catch (e) {
