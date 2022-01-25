@@ -315,4 +315,4 @@ async function validateTransaction(userDetails, topUpAmount){   // make a column
         }else{
           return false;
       }
-  }
+}
