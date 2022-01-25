@@ -33,20 +33,7 @@ bot.on('message', (message) => {
     const args = (message.content.substring(COMMAND_PREFIX.length).split(" ")).filter(n=>n)
     // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
-    if (args[0].startsWith('0x') && args[1].startsWith('0x')){
-      if (!args[1]){
-        if (args[0] && web3.utils.isHex(args[0])){
-          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.')
-              .setColor(0xff1100).setTimestamp();
-          message.lineReply(embed);
-          return
-        }else if (args[0] && web3.utils.isAddress(args[0])){
-          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.')
-              .setColor(0xff1100).setTimestamp();
-          message.lineReply(embed);
-          return
-        }
-      }
+    if (args[0] && args[1] && args[0].startsWith('0x') && args[1].startsWith('0x')){
       const isAddress = web3.utils.isAddress(args[0]);
       const isHex = web3.utils.isHexStrict(args[1]);
       if (isHex && isAddress){
@@ -68,16 +55,27 @@ bot.on('message', (message) => {
         message.lineReply(embed);
         return
       }
+    } else if (!args[0]){
+      embed.setDescription('**Error**\nNo arguments provided. Please check the guide.')
+          .setColor(0xff1100).setTimestamp();
+      message.lineReply(embed);
+      return
+
+    }else if (!args[1]){
+      if (args[0] && web3.utils.isHex(args[0])){
+        embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+        return
+      }else if (args[0] && web3.utils.isAddress(args[0])){
+        embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.')
+            .setColor(0xff1100).setTimestamp();
+        message.lineReply(embed);
+        return
+      }
     }
 
     switch(args[0]){
-      // Faucet commands
-      case 'null': {
-        embed.setDescription('**Error**\nUse `+goerlieth help` for the list of commands!')
-            .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
-        break;
-      }
       // Other commands
       case 'help': {
         console.log("help called");
@@ -86,32 +84,6 @@ bot.on('message', (message) => {
         message.lineReply(EMBEDDED_HELP_MESSAGE);
         break;
       }
-      // case 'add': {
-      //   console.log('add address called')
-      //   if (!args[1]){
-      //     embed.setDescription("**Error**\nPlease provide an address to add, i.e. `+goerlieth add <your address>`");
-      //     message.lineReply(embed);
-      //     break;
-      //   }
-      //   if (web3.utils.isAddress(args[1]) && addressExists){
-      //     db.addAddress(message.author.id, args[1]);
-      //     embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
-      //         .setColor(3447003).setTimestamp();
-      //     message.lineReply(embed);
-      //     return
-      //   }else if (!web3.utils.isAddress(args[1])){
-      //     embed.setDescription('**Error**\nPlease enter a valid address!')
-      //         .setColor(0xff1100).setTimestamp();
-      //     message.lineReply(embed);
-      //     return
-      //   }else if (addressExists){
-      //     embed.setDescription('**Error**\nYour address is already added to the database.')
-      //         .setColor(0xff1100).setTimestamp();
-      //     message.lineReply(embed);
-      //     return
-      //   }
-      //   break;
-      // }
       case 'mod': {
         // Tag the moderators
         console.log("mod called");
@@ -121,7 +93,7 @@ bot.on('message', (message) => {
         message.lineReply(embed);
         break;
       }
-      // For fun :)
+        // For fun :)
       case 'dance': {
         console.log("dance called");
         embed.setImage('https://c.tenor.com/fJh-W38iA3oAAAAM/dance-kid.gif').setColor(3447003).setTimestamp();
@@ -131,8 +103,7 @@ bot.on('message', (message) => {
     }
   } catch (e) {
     console.log(e);
-    let embed = new Discord.MessageEmbed().setDescription('**Error**\nSomething went wrong. If this continues,' +
-        ' please contact the mods of this bot by using command: `!mod`').setColor(0xff1100).setTimestamp();
+    let embed = new Discord.MessageEmbed().setDescription('**Error**\nSomething went wrong. If this continues, please contact the mods of this bot by using command: `!mod`').setColor(0xff1100).setTimestamp();
     message.lineReply(embed);
   }
 });
