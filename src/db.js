@@ -132,7 +132,7 @@ module.exports = {
 }
 
 async function updateAddress(discordID, address){
-    const query = `update depositertest set address=$1 where discordid=$2`
+    const query = `update depositortest set address=$1 where discordid=$2`
     const vals = [String(address), BigInt(discordID)]
     await pool.query(query, vals);
 }
