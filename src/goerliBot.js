@@ -100,7 +100,7 @@ module.exports = {
   name: 'goerliBot',
   description: 'Sends goerli eth to the user.',
   execute(message, args, runCustomChecks = true) {
-    runGoerliFaucet(message, args[1], args[2], runCustomChecks);
+    runGoerliFaucet(message, args[0], args[1], runCustomChecks);
   }
 } 
 

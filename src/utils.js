@@ -58,7 +58,8 @@ exports.setCachedNonce = (nonce) => {
 
 // Sending the goerli ETH
 exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
-  console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
+  // console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
+  console.log('Hex data: ')
   //const methodAbi = process.env.METHOD_ABI
   console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
 
