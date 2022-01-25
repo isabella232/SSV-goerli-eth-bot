@@ -36,12 +36,12 @@ bot.on('message', (message) => {
     if (args[0].startsWith('0x') && args[1].startsWith('0x')){
       if (!args[1]){
         if (args[0] && web3.utils.isHex(args[0])){
-          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` first then your `hex`.')
+          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
           return
         }else if (args[0] && web3.utils.isAddress(args[0])){
-          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` after the `address`.')
+          embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
           return
