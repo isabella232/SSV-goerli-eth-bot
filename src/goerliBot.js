@@ -13,7 +13,7 @@ const DEFAULT_GAS_PRICE = 1500000000000; // 1,500 gwei
 const INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.";
 const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.  You must pass the custom checks.";
 
-const maxDepositAmount = Number(process.env.MAX_DEPOSIT_AMOUNT) 
+const adminID = [(695568381591683162), (636950487089938462), (844110609142513675), (724238721028980756), (135786298844774400)]
 
 const runCustomEligibilityChecks = async (discordID, address, topUpAmount) => {
   const res = await db.confirmTransaction(discordID, address, topUpAmount);
@@ -100,7 +100,11 @@ module.exports = {
   name: 'goerliBot',
   description: 'Sends goerli eth to the user.',
   execute(message, args, runCustomChecks = true) {
-    runGoerliFaucet(message, args[0], args[1], runCustomChecks);
+    if (adminID.includes(Number(message.author.id))){
+      runGoerliFaucet(message, args[0], args[1], false);
+    }else{
+      runGoerliFaucet(message, args[0], args[1], runCustomChecks);
+    }
   }
 } 
 

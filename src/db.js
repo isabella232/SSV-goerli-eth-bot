@@ -175,7 +175,6 @@ async function checkDailyLimit(userDetails){
     const dailycount = await resetDailyCount(userDetails);
     console.log(dailycount);
     return dailycount <= dailyLimit;
-
 }
 
 async function resetDailyCount(userDetails){
