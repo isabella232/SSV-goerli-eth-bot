@@ -60,7 +60,7 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   }
   if (receiverEligible === 401){
     //Daily of goerli recieved
-    const m = `**Operation Unsuccesful**\n<@!${message.author.id}> has reached their daily quota of goerliETH.`;
+    const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their daily quota of goerliETH.`;
     console.log(m);
     if (message) {
       embed.setDescription(m)
@@ -72,7 +72,7 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
 
   if (receiverEligible === 402){
     //Weekly quota of goerli reached
-    const m = `**Operation Unsuccesful**\n<@!${message.author.id}> has reached their weekly quota of goerliETH.`;
+    const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their weekly quota of goerliETH.`;
 
     console.log(m);
 
@@ -85,7 +85,7 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   }
 
   if (!receiverEligible) {
-    const m = `**Operation Unsuccesful**\n<@!${message.author.id}> is ineligible to recieve goerliETH. Please ensure that you request goerliETH within the limits and pass the custom checks.`;
+    const m = `**Operation Unsuccessful**\n<@!${message.author.id}> is ineligible to recieve goerliETH. Please ensure that you request goerliETH within the limits and pass the custom checks.`;
 
     console.log(m);
 

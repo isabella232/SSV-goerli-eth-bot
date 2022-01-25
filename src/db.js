@@ -65,8 +65,8 @@ pool.query(createLogTable, (err, res) =>{
 })
 
 const depositAmount = process.env.DEPOSIT_AMOUNT; //should be 32000000000000000000
-const dailyLimit = parseFloat(process.env.DAILY_LIMIT);
-const weeklyLimit = parseFloat(process.env.WEEKLY_LIMIT);
+const dailyLimit = parseFloat(process.env.DAILY_LIMIT) - 1;
+const weeklyLimit = parseFloat(process.env.WEEKLY_LIMIT) - 1;
 const maxTries = 3;
 
 module.exports = {
