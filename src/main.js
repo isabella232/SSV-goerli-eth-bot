@@ -9,7 +9,7 @@ require('./db');
 const COMMAND_PREFIX = '+goerlieth';
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle('SSV Goerli Deposit Bot').setColor(3447003)
     .setDescription("Welcome to the Deposit Bot for **ssv.network Incentivezed Testnet**.\nThis **BOT** will make a **32 goerli** deposit to your validator.\n\n**BOT rules:**\n**1.**\nOne message can be sent every 6 hours, please make sure to read and understand how the bot works before you continue.\n**2.**\n Each user is entitled to 1 deposit per 24 hours.\n**3.**\nTrying to abuse the bot will result in a **ban**, **disqualification** from the testnet and **block**.\n\n**To generate HEX data for your deposit:**\n**1.**\nGet to the validator deposit stage on: https://prater.launchpad.ethereum.org/en/overview and change `disabled` to `enabled` by `inspecting` the button (on the launchpad page)https://i.imgur.com/izYw5QU.gif\n**2.**\n On the send deposit page - once Metamask is open, open the Data page and copy the Hex Data. https://i.imgur.com/2XGOT9H.gif. Now move to Discord Bot Channel.\n\n**Guide:**")
-    .addField("+goerlieth <address> <hex-data>", 'To start you need to register the wallet address you used to generate the **hex** and the **hex** itself.')
+    .addField("+goerlieth <address> <hex-data>", 'To start you need to register the **wallet address** you used to generate the **hex** and the **hex** itself.')
     .addField("+goerlieth help", 'Help with the bot.')
     .addField("+goerlieth mod", "Ping the admins for help if the **BOT** is malfunctioning (spamming this will result in a **BAN**)")
 
@@ -30,25 +30,25 @@ bot.on('message', (message) => {
 
     let embed = new Discord.MessageEmbed()
 
-    const args = message.content.substring(COMMAND_PREFIX.length).split(" ")
+    const args = (message.content.substring(COMMAND_PREFIX.length).split(" ")).filter(n=>n)
     // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
-    if (args[1].startsWith('0x') && args[2].startsWith('0x')){
-      if (!args[2]){
-        if (args[1] && web3.utils.isHex(args[1])){
+    if (args[0].startsWith('0x') && args[1].startsWith('0x')){
+      if (!args[1]){
+        if (args[0] && web3.utils.isHex(args[0])){
           embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` first then your `hex`.')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
           return
-        }else if (args[1] && web3.utils.isAddress(args[1])){
+        }else if (args[0] && web3.utils.isAddress(args[0])){
           embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` after the `address`.')
               .setColor(0xff1100).setTimestamp();
           message.lineReply(embed);
           return
         }
       }
-      const isAddress = web3.utils.isAddress(args[1]);
-      const isHex = web3.utils.isHexStrict(args[2]);
+      const isAddress = web3.utils.isAddress(args[0]);
+      const isHex = web3.utils.isHexStrict(args[1]);
       if (isHex && isAddress){
         bot.commands.get('goerliBot').execute(message, args, true);
         return
@@ -70,7 +70,7 @@ bot.on('message', (message) => {
       }
     }
 
-    switch(args[1]){
+    switch(args[0]){
       // Faucet commands
       case 'null': {
         embed.setDescription('**Error**\nUse `+goerlieth help` for the list of commands!')
@@ -88,18 +88,18 @@ bot.on('message', (message) => {
       }
       // case 'add': {
       //   console.log('add address called')
-      //   if (!args[2]){
+      //   if (!args[1]){
       //     embed.setDescription("**Error**\nPlease provide an address to add, i.e. `+goerlieth add <your address>`");
       //     message.lineReply(embed);
       //     break;
       //   }
-      //   if (web3.utils.isAddress(args[2]) && addressExists){
-      //     db.addAddress(message.author.id, args[2]);
+      //   if (web3.utils.isAddress(args[1]) && addressExists){
+      //     db.addAddress(message.author.id, args[1]);
       //     embed.setDescription('**Operation Successful**\nYour address was recorded successfully!')
       //         .setColor(3447003).setTimestamp();
       //     message.lineReply(embed);
       //     return
-      //   }else if (!web3.utils.isAddress(args[2])){
+      //   }else if (!web3.utils.isAddress(args[1])){
       //     embed.setDescription('**Error**\nPlease enter a valid address!')
       //         .setColor(0xff1100).setTimestamp();
       //     message.lineReply(embed);
