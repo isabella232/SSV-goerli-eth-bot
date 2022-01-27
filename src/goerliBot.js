@@ -2,7 +2,7 @@ require('dotenv').config({path: '../.env'})
 
 const utils = require('./utils.js');
 const Discord = require('discord.js');
-const etherscan = require('./api.js');
+const {getGasPrice} = require('./api.js');
 const db = require('./db');
 const Web3 = require('web3');
 const { max } = require('pg/lib/defaults');
@@ -106,7 +106,8 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   const nonce = utils.getCachedNonce();
 
   try {
-    utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
+    const latestGasPrice = await getGasPrice;
+    await utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, latestGasPrice);
   } catch (e) {
     if (message) {
       embed.setDescription("**Transfer Failed\nPlease try again later**").

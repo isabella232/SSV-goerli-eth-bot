@@ -6,23 +6,10 @@ const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_E
 const Discord = require('discord.js');
 const db = require('./db');
 const contractABI = require('../contract-abi.json')
-const etherscan = require('./api.js');
+const { get } = require('http');
 
 abiDecoder.addABI(contractABI);
 
-var lastGasPrice = 1500000000000;
-
-async function getGasPrice(web3) {
-  while (true) {
-      const nodeGasPrice = await web3.eth.getGasPrice();
-      const userGasPrice = await scan(`Enter gas-price or leave empty to use ${nodeGasPrice}: `);
-      if (/^\d+$/.test(userGasPrice))
-          return userGasPrice;
-      if (userGasPrice == "")
-          return nodeGasPrice;
-      console.log("Illegal gas-price");
-  }
-}
 
 // Eth
 exports.getAddressTransactionCount = async (address) => {
@@ -73,11 +60,8 @@ exports.setCachedNonce = (nonce) => {
 
 
 // Sending the goerli ETH
-exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
-  
-  // console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
+exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, latestGasPrice) => {
   console.log('Hex data: ')
-  //const methodAbi = process.env.METHOD_ABI
   console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
 
   const transaction = {
@@ -86,7 +70,7 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
     gas: 1000000,
     value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
     data: methodAbi,
-    gasPrice: await etherscan.getGasPrice(),
+    gasPrice: latestGasPrice,
     chainID: 5,
     nonce,
   }
@@ -100,8 +84,7 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
           let embed = new Discord.MessageEmbed()
               .setDescription(`**Operation Successful**\nSent **${amount} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
               .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
-          prevMsg.edit(embed);
-          
+          prevMsg.edit(embed);          
           try {
             const decodedHexData = abiDecoder.decodeMethod(methodAbi);
             const pubKey = decodedHexData.params[0].value;
