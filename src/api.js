@@ -1,9 +1,12 @@
 const axios = require('axios');
 const rateLimit = require('axios-rate-limit');
+const ZStream = require('pako/lib/zlib/zstream');
 require('dotenv').config({path: '../.env'})
 const { ETHERSCAN_API_KEY, ETHERSCAN_API_URL, FAUCET_ADDRESS, GOERLI_API_URL } = process.env;
 const request = rateLimit(axios.create(), {maxRequests: 5, perMillisecondss: 500})
 const maxTries = 3;
+
+var lastGasPrice = 1500000000000;
 
 const getBlockNumber = async function(time) {
     const url = `${ETHERSCAN_API_URL}?module=block&action=getblocknobytime&timestamp=${time}&closest=before&apikey=${ETHERSCAN_API_KEY}`
@@ -14,6 +17,7 @@ const getTransactions = async function (address, fromBlock) {
     const res = await request.get(url)
     return res.data.result;
 }
+
 
 module.exports = {
     checkDeposit: async function(address) {
@@ -49,6 +53,16 @@ module.exports = {
             } catch (e) {
                 if (++count == maxTries) return null;
             }
+        }
+    },
+    getGasPrice: async function(){
+        try{
+            const url = `${GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API_KEY}`
+            lastGasPrice =  (await request.get(url)).data.result.FastGasPrice
+            return lastGasPrice
+        }
+        catch{
+            return lastGasPrice
         }
     }
     

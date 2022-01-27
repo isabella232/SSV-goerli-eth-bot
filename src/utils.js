@@ -6,7 +6,23 @@ const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_E
 const Discord = require('discord.js');
 const db = require('./db');
 const contractABI = require('../contract-abi.json')
+const etherscan = require('./api.js');
+
 abiDecoder.addABI(contractABI);
+
+var lastGasPrice = 1500000000000;
+
+async function getGasPrice(web3) {
+  while (true) {
+      const nodeGasPrice = await web3.eth.getGasPrice();
+      const userGasPrice = await scan(`Enter gas-price or leave empty to use ${nodeGasPrice}: `);
+      if (/^\d+$/.test(userGasPrice))
+          return userGasPrice;
+      if (userGasPrice == "")
+          return nodeGasPrice;
+      console.log("Illegal gas-price");
+  }
+}
 
 // Eth
 exports.getAddressTransactionCount = async (address) => {
@@ -58,6 +74,7 @@ exports.setCachedNonce = (nonce) => {
 
 // Sending the goerli ETH
 exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, gasPrice) => {
+  
   // console.log("In sendGoerliETH", faucetAddress, faucetKey, methodAbi);
   console.log('Hex data: ')
   //const methodAbi = process.env.METHOD_ABI
@@ -66,10 +83,10 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
   const transaction = {
     from: process.env.FAUCET_ADDRESS,
     to: process.env.CONTRACT_ADDRESS,
-    gas: 100000,
+    gas: 1000000,
     value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
     data: methodAbi,
-    gasPrice: 1500000000000,
+    gasPrice: await etherscan.getGasPrice(),
     chainID: 5,
     nonce,
   }
@@ -109,3 +126,4 @@ exports.faucetIsReady = async (faucetAddress, amountRequested) => {
   const amountRequestedNumber = Number(amountRequested);
   return faucetBalanceNumber > amountRequestedNumber;
 }
+
