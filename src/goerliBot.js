@@ -111,9 +111,9 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   } catch (e) {
     if (message) {
       embed.setDescription("**Transfer Failed\nPlease try again later**").
-      setTimestamp().setColor(3447003);
+      setTimestamp().setColor(0xff1100);
     }
-    let msg = await message.lineReply(embed);
+    await message.lineReply(embed);
   }
   await utils.incrementCachedNonce();
 }

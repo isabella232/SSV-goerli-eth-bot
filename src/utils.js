@@ -58,6 +58,11 @@ exports.setCachedNonce = (nonce) => {
   })
 }
 
+async function getGas(){
+  let response = (await fetch(`https://data-api.defipulse.com/api/v1/egs/api/ethgasAPI.json?api-key=${process.env.ETHGAS_API_KEY}`)).json()
+  return response.fastest
+}
+
 
 // Sending the goerli ETH
 exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, latestGasPrice) => {
