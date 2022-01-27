@@ -1,6 +1,5 @@
 const axios = require('axios');
 const rateLimit = require('axios-rate-limit');
-const ZStream = require('pako/lib/zlib/zstream');
 require('dotenv').config({path: '../.env'})
 const { ETHERSCAN_API_KEY, ETHERSCAN_API_URL, FAUCET_ADDRESS, GOERLI_API_URL } = process.env;
 const request = rateLimit(axios.create(), {maxRequests: 5, perMillisecondss: 500})
@@ -58,8 +57,8 @@ module.exports = {
     getGasPrice: async function(){
         try{
             const url = `${GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API_KEY}`
-            lastGasPrice =  (await request.get(url)).data.result.FastGasPrice
-            return lastGasPrice
+            lastGasPrice =  (await axios.get(url)).data.result.FastGasPrice
+            return Number(lastGasPrice + '0000000000')
         }
         catch{
             return lastGasPrice

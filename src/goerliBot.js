@@ -6,13 +6,7 @@ const {getGasPrice} = require('./api.js');
 const db = require('./db');
 const Web3 = require('web3');
 const { max } = require('pg/lib/defaults');
-const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
-
-const DEFAULT_GAS_PRICE = 1500000000000; // 1,500 gwei
-
-const INELIGIBLE_NO_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.";
-const INELIGIBLE_CUSTOM_CHECKS_MESSAGE = " is ineligible to receive goerli eth.  You must pass the custom checks.";
-
+new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
 const adminID = [(695568381591683162), (636950487089938462), (844110609142513675), (724238721028980756), (135786298844774400)]
 
 const runCustomEligibilityChecks = async (discordID, address, topUpAmount) => {
@@ -106,14 +100,15 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   const nonce = utils.getCachedNonce();
 
   try {
-    const latestGasPrice = await getGasPrice;
+    const latestGasPrice = await getGasPrice();
     await utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, latestGasPrice);
   } catch (e) {
+    console.log(e)
     if (message) {
-      embed.setDescription("**Transfer Failed\nPlease try again later**").
+      embed.setDescription("**Transaction Failed**\nPlease try again later").
       setTimestamp().setColor(0xff1100);
     }
-    await message.lineReply(embed);
+    await msg.edit(embed);
   }
   await utils.incrementCachedNonce();
 }

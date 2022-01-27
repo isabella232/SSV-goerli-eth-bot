@@ -6,7 +6,6 @@ const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_E
 const Discord = require('discord.js');
 const db = require('./db');
 const contractABI = require('../contract-abi.json')
-const { get } = require('http');
 
 abiDecoder.addABI(contractABI);
 
@@ -58,27 +57,23 @@ exports.setCachedNonce = (nonce) => {
   })
 }
 
-async function getGas(){
-  let response = (await fetch(`https://data-api.defipulse.com/api/v1/egs/api/ethgasAPI.json?api-key=${process.env.ETHGAS_API_KEY}`)).json()
-  return response.fastest
-}
-
-
 // Sending the goerli ETH
 exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, methodAbi, amount, nonce, latestGasPrice) => {
   console.log('Hex data: ')
   console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
-
+  console.log('gasPrice: ', latestGasPrice)
   const transaction = {
     from: process.env.FAUCET_ADDRESS,
     to: process.env.CONTRACT_ADDRESS,
     gas: 1000000,
     value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
     data: methodAbi,
-    gasPrice: latestGasPrice,
+    gasPrice: Number(latestGasPrice),
     chainID: 5,
     nonce,
   }
+
+  let embed = new Discord.MessageEmbed()
 
   web3.eth.accounts.signTransaction(transaction, process.env.FAUCET_PRIVATE_KEY)
       .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
@@ -86,10 +81,9 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
         console.log("Sent to " + message.author.id + " transaction receipt: ", receipt)
 
         if (message) {
-          let embed = new Discord.MessageEmbed()
-              .setDescription(`**Operation Successful**\nSent **${amount} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
+          embed.setDescription(`**Operation Successful**\nSent **${amount} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
               .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
-          prevMsg.edit(embed);          
+          prevMsg.edit(embed);
           try {
             const decodedHexData = abiDecoder.decodeMethod(methodAbi);
             const pubKey = decodedHexData.params[0].value;
@@ -101,6 +95,7 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
       })
       .catch(err => {
         console.error("this is the error: " + err);
+        prevMsg.edit(embed.setDescription(`**Error**\n${err}`).setColor(0xff1100).setTimestamp())
         throw err;
       });
 }
