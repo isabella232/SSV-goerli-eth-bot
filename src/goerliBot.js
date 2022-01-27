@@ -104,8 +104,16 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   }
   let msg = await message.lineReply(embed);
   const nonce = utils.getCachedNonce();
-  utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
 
+  try {
+    utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, DEFAULT_GAS_PRICE);
+  } catch (e) {
+    if (message) {
+      embed.setDescription("**Transfer Failed\nPlease try again later**").
+      setTimestamp().setColor(3447003);
+    }
+    let msg = await message.lineReply(embed);
+  }
   await utils.incrementCachedNonce();
 }
 
