@@ -58,6 +58,9 @@ module.exports = {
         try{
             const url = `${GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API_KEY}`
             lastGasPrice =  (await axios.get(url)).data.result.FastGasPrice
+            if (isNaN(lastGasPrice)){
+                return "1500000000000"
+            }
             return Number(lastGasPrice + '0000000000')
         }
         catch{
