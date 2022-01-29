@@ -87,7 +87,11 @@ exports.sendGoerliEth = (address, prevMsg, message, faucetAddress, faucetKey, me
           try {
             const decodedHexData = abiDecoder.decodeMethod(methodAbi);
             const pubKey = decodedHexData.params[0].value;
-            db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData));
+            db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
+                .then(result => {
+                  if (result === true) console.log("Tx Logged");
+                  else  console.error('Tx log failed');
+                })
           } catch (e) {
             console.log(e);
           }

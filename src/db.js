@@ -4,11 +4,11 @@ const { Pool } = require('pg');
 const { max } = require('pg/lib/defaults');
 
 let pool = new Pool({
-  user: process.env.DB_USERNAME,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASS,
-  port: process.env.DB_PORT,
+    user: process.env.DB_USERNAME,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASS,
+    port: process.env.DB_PORT,
 })
 pool.connect();
 
@@ -19,22 +19,17 @@ pool.query('SELECT NOW()', (err, res) => {
     else {
         console.log('Database connected!');
     }
-  });
+});
 
-const createTable = `create table if not exists depositortest
-(
+
+const createTable = `create table if not exists depositortest(
     discordid         bigint not null constraint depositortest_pk primary key,
     address           varchar,
-    norequests        integer,
     dailycount        real,
     weeklycount       real,
-    firstrequesttime  timestamp,
     dailytime         timestamp,
     weeklytime        timestamp,
-    validatedtx       varchar,
-    unaccountedamount real,
-    unaccountedtx     varchar
-);`
+)`
 
 const createLogTable = `create table if not exists txlogs(
     discord_id bigint,
@@ -80,7 +75,7 @@ module.exports = {
                 //Assumes userDetails will always be an array
                 if (!userDetails.length){
                     const userDetails = await setDepositor(discordID, address);
-                    await updateCounts(userDetails, topUpAmount);
+                    await this.updateCounts(userDetails.discordid, topUpAmount);
                     return true
                 }
                 userDetails = userDetails[0];
@@ -88,7 +83,7 @@ module.exports = {
                     await updateAddress(discordID, address)
                     userDetails.address = address
                 }
-                //refresh daily limit and weekly limit 
+                //refresh daily limit and weekly limit
                 //check daily limit and weekly limit
                 //If either are reached reject transaction
                 if (!(await checkDailyLimit(userDetails))){
@@ -98,11 +93,8 @@ module.exports = {
                     return 402;
                 }
                 //refresh norequests
-                const norequests = await resetNoRequests(userDetails);
-                if (norequests === 0){
-                    await updateCounts(userDetails, topUpAmount);
-                    return true
-                }
+                await this.updateCounts(discordID,topUpAmount)
+                return true
 
                 userDetails = (await checkUserExists(discordID))[0];
                 // userDetails.address = addressQuery[0].address;
@@ -111,6 +103,22 @@ module.exports = {
             } catch (e) {
                 console.log(e)
                 if (++count == maxTries) return null;
+            }
+        }
+    },
+    updateCounts: async function(discordID, topUpAmount){
+        var count = 0;
+        while (true){
+            try{
+                var newDailyCount = Number(userDetails.dailycount + topUpAmount);
+                var newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
+
+                const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
+                const values = [newDailyCount,newWeeklyCount, BigInt(discordID)];
+                await pool.query(update,values);
+                return true
+            } catch (e) {
+                if (++count == maxTries) return false;
             }
         }
     },
@@ -125,9 +133,9 @@ module.exports = {
                 await pool.query(insert,values);
                 return true
             } catch (e) {
-                if (++count == maxTries) return;
+                if (++count == maxTries) return false;
             }
-        } 
+        }
     }
 }
 
@@ -150,24 +158,19 @@ async function checkUserExists(discordID){
 async function setDepositor(discordID, address){
     const now = new Date();
     const insert = `
-        INSERT INTO depositortest 
-            (discordid,address,norequests,dailyCount,weeklyCount,firstrequesttime,dailyTime,weeklyTime,validatedtx,unaccountedamount,unaccountedtx) 
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+        INSERT INTO depositortest
+            (discordid,address,dailyCount,weeklyCount,dailyTime,weeklyTime) 
+            VALUES ($1,$2,$3,$4,$5,$6);
         `
-    const insertVals = [BigInt(discordID),address,1,0,0,now,now,now,"",0,""];
+    const insertVals = [BigInt(discordID),address,0,0,now,now];
     await pool.query(insert, insertVals);
     return {
         discordid: BigInt(discordID),
         address: address,
-        norequests: 1,
         dailycount: 0,
         weeklycount: 0,
-        firstrequesttime: now,
         dailytime: now,
         weeklytime: now,
-        validatedTx: "",
-        unaccountedamount: 0,
-        unaccountedtx: ""
     };
 }
 
@@ -184,14 +187,14 @@ async function resetDailyCount(userDetails){
     const dailytime = userDetails.dailytime;
     if ((Math.floor(now.getTime()/1000 - Math.floor(dailytime.getTime()/1000))) > 86400){
         //update
-        console.log('Resetting...');
+        console.log('Resetting Daily...');
         const update = 'update depositortest set dailycount=0,dailytime=$1 where discordid= $2 returning dailycount'
         const values = [now, discordID]
         const dailycount = await pool.query(update,values);
         return dailycount.rows[0].dailycount; //daily limit has been reset
     }
     return userDetails.dailycount;
-    
+
 
 }
 
@@ -207,112 +210,11 @@ async function resetWeeklyCount(userDetails){
 
     if ((Math.floor(now.getTime()/1000 - Math.floor(weeklytime.getTime()/1000))) > 604800){
         //update
+        console.log('Resetting Weekly...');
         const update = 'update depositortest set weeklycount=0,weeklytime=$1 where discordid= $2 returning weeklycount'
         const values = [now,discordID]
         const weeklycount = await pool.query(update,values);
         return weeklycount.rows[0].weeklycount; //weekly limit has been reset
     }
     return userDetails.weeklycount;
-}
-
-async function resetNoRequests(userDetails){
-    // console.log(userDetails)
-    const now = new Date();
-    const discordID = BigInt(userDetails.discordid);
-    const firstrequesttime = userDetails.firstrequesttime;
-    if ((Math.floor(now.getTime()/1000 - Math.floor(firstrequesttime.getTime()/1000))) > 172800){
-        //update
-        const update = 'update depositortest set norequests=0,firstrequesttime=$1 where discordid= $2 returning norequests'
-        const values = [now,discordID]
-        const norequests = await pool.query(update,values);
-        return norequests.rows[0].norequests; //daily limit has been reset
-    }
-    return userDetails.norequests;
-}
-
-async function updateCounts(userDetails, topUpAmount){
-    var newDailyCount = Number(userDetails.dailycount + topUpAmount);
-    var newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
-    
-    const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
-    const values = [newDailyCount,newWeeklyCount, String(userDetails.discordid)];
-    await pool.query(update,values);
-}
-  
-async function objectRowUpdate(userDetails){
-      const update = 'update depositortest set validatedtx= $1,unaccountedamount= $2, unaccountedtx= $3, dailycount= $4, weeklycount= $5 where discordid= $6';
-      const values = [String(userDetails.validatedtx), Number(userDetails.unaccountedamount), String(userDetails.unaccountedtx), Number(userDetails.dailycount), Number(userDetails.weeklycount), String(userDetails.discordid)]
-      const result = await pool.query(update, values);
-  }
-
-function getUnvalidatedTx(depositedTx, lastValidatedTx){
-  let index = null;
-  for (let i=0; i < depositedTx.length; i++){
-    if (depositedTx[i].hash == lastValidatedTx){
-      index = i;
-    }
-  }
-  if (index){
-    return depositedTx.slice(0, index);
-  }else{
-    return depositedTx;
-  }
-}
-
-async function validateTransaction(userDetails, topUpAmount){   // make a column for unaccountedAmount in db
-        let lastValidatedTx = userDetails.validatedtx;
-        //console.log(userDetails.address);
-        let depositedTx = getUnvalidatedTx((await checkDeposit(userDetails.address)), lastValidatedTx); // confirm checkDeposit.confirmTransaction function
-        console.log(depositedTx);
-        let depositComplete = false;
-        if (depositedTx.length){
-          if (lastValidatedTx){
-            for (let i = 0; i < depositedTx.length; i++){
-                if ((Number(depositedTx[i].amount) == depositAmount) && (depositedTx[i].hash != lastValidatedTx) && userDetails.unaccountedamount < Number(depositAmount)){
-                depositComplete = true;
-                userDetails.validatedtx = depositedTx[i].hash;
-                userDetails.weeklycount += topUpAmount;
-                userDetails.dailycount += topUpAmount;
-                await objectRowUpdate(userDetails);
-              }else if ((Number(depositedTx[i].amount) < depositAmount) && (depositedTx[i].hash != lastValidatedTx)){
-                userDetails.unaccountedamount +=  Number(depositedTx[i].amount);
-                userDetails.unaccountedtx = depositedTx[i].hash;
-                await objectRowUpdate(userDetails);
-              }else if ((Number(depositedTx[i].amount) > depositAmount) && (depositedTx[i].hash != lastValidatedTx)){
-                userDetails.unaccountedtx = depositedTx[i].hash;
-                userDetails.unaccountedamount += (Number(depositedTx[i].amount) - depositAmount);
-                await objectRowUpdate(userDetails);
-              }}}
-          else{
-            for (let i = 0; i < depositedTx.length; i++){
-                if ((Number(depositedTx[i].amount) == depositAmount) && (depositedTx[i].hash != lastValidatedTx) && userDetails.unaccountedamount < depositAmount){
-                depositComplete = true;
-                userDetails.validatedtx = depositedTx[i].hash;
-                userDetails.weeklycount += topUpAmount;
-                userDetails.dailycount += topUpAmount;
-                await objectRowUpdate(userDetails);
-                depositComplete = true;
-              }else if ((Number(depositedTx[i].amount) < depositAmount) && (depositedTx[i].hash != lastValidatedTx)){
-                userDetails.unaccountedamount +=  Number(depositedTx[i].amount);
-                userDetails.unaccountedtx = depositedTx[i].hash;
-                await objectRowUpdate(userDetails);
-              }else if ((Number(depositedTx[i].amount) > depositAmount) && (depositedTx[i].hash != lastValidatedTx)){
-                userDetails.unaccountedtx = depositedTx[i].hash;
-                userDetails.unaccountedamount += (Number(depositedTx[i].amount) - depositAmount);
-                await objectRowUpdate(userDetails);
-              }}}
-          if ((userDetails.unaccountedamount >= depositAmount) && !(depositComplete)){
-            userDetails.unaccountedamount -= depositAmount;
-            userDetails.validatedtx = userDetails.unaccountedtx;
-            userDetails.unaccountedtx = '';
-            userDetails.weeklycount += depositAmount;
-            userDetails.dailycount += depositAmount;
-            depositComplete = true;
-            await objectRowUpdate(userDetails);
-          } 
-          console.log(userDetails);
-          return depositComplete;
-        }else{
-          return false;
-      }
 }

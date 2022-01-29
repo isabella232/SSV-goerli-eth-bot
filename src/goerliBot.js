@@ -77,20 +77,6 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
     }
     return;
   }
-
-  if (!receiverEligible) {
-    const m = `**Operation Unsuccessful**\n<@!${message.author.id}> is ineligible to recieve goerliETH. Please ensure that you request goerliETH within the limits and pass the custom checks.`;
-
-    console.log(m);
-
-    if (message) {
-      embed.setDescription(m)
-          .setTimestamp().setColor(3447003);
-      await message.lineReply(embed);
-    }
-    return;
-  }
-
   console.log("Checks passed - sending to " +  message.author.id);
   if (message) {
     embed.setDescription("**Operation Successful**\nChecks passed - sending...").
