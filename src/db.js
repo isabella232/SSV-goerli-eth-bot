@@ -28,7 +28,7 @@ const createTable = `create table if not exists depositortest(
     dailycount        real,
     weeklycount       real,
     dailytime         timestamp,
-    weeklytime        timestamp,
+    weeklytime        timestamp
 )`
 
 const createLogTable = `create table if not exists txlogs(
