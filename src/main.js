@@ -22,9 +22,9 @@ bot.on('ready', () => {
   console.log('I am ready!');
 });
 
-bot.on('message', (message) => {
+bot.on('message', async function (message) {
   try {
-    if (!message || message.length === 0 || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) {
+    if (!message || message.content.length === 0 || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) {
       return;
     }
 
@@ -42,35 +42,35 @@ bot.on('message', (message) => {
       } else if(!isAddress){
         embed.setDescription('**Error**\nInvalid `Address`.')
             .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         return
       }else if (!isHex){
         embed.setDescription('**Error**\nInvalid `Hex`.')
             .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         return
       }else{
         embed.setDescription('**Error**\nUnknown error occurred.')
             .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         return
       }
     } else if (!args[0]){
       embed.setDescription('**Error**\nNo arguments provided. Please check the guide.')
           .setColor(0xff1100).setTimestamp();
-      message.lineReply(embed);
+      await message.lineReply(embed);
       return
 
     }else if (!args[1]){
       if (args[0] && web3.utils.isHex(args[0])){
         embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.')
             .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         return
       }else if (args[0] && web3.utils.isAddress(args[0])){
         embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.')
             .setColor(0xff1100).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         return
       }
     }
@@ -81,7 +81,7 @@ bot.on('message', (message) => {
         console.log("help called");
         const attachment = new Discord.MessageAttachment('./src/img.png', 'img.png');
         EMBEDDED_HELP_MESSAGE.attachFiles(attachment).setImage('attachment://img.png');
-        message.lineReply(EMBEDDED_HELP_MESSAGE);
+        await message.lineReply(EMBEDDED_HELP_MESSAGE);
         break;
       }
       case 'mod': {
@@ -90,20 +90,20 @@ bot.on('message', (message) => {
         // Uncomment below and add discord ids if you'd like to be tagged
         embed.setDescription('**Alerting the Administrators**\n <@&723840404159594496> come check this out!')
             .setColor(3447003).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         break;
       }
         // For fun :)
       case 'dance': {
         console.log("dance called");
         embed.setImage('https://c.tenor.com/fJh-W38iA3oAAAAM/dance-kid.gif').setColor(3447003).setTimestamp();
-        message.lineReply(embed);
+        await message.lineReply(embed);
         break;
       }
     }
   } catch (e) {
     console.log(e);
     let embed = new Discord.MessageEmbed().setDescription('**Error**\nSomething went wrong. If this continues, please contact the mods of this bot by using command: `!mod`').setColor(0xff1100).setTimestamp();
-    message.lineReply(embed);
+    await message.lineReply(embed);
   }
 });
