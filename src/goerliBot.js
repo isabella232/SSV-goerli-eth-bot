@@ -8,7 +8,6 @@ const Web3 = require('web3');
 const { max } = require('pg/lib/defaults');
 const { updateCounts } = require('./db');
 new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
-const adminID = [(695568381591683162), (636950487089938462), (844110609142513675), (724238721028980756), (135786298844774400)]
 
 const runCustomEligibilityChecks = async (discordID, address, topUpAmount) => {
   const res = await db.confirmTransaction(discordID, address, topUpAmount);
@@ -27,57 +26,60 @@ const receiverIsEligible = async (discordID, address, amountRequested, runCustom
   }
 }
 
-const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
-  let embed = new Discord.MessageEmbed();
-  console.log("DiscordID " + message.author.id + " is requesting " + 32 + " goerli eth.  Custom checks: " + runCustomChecks);
+// This runs once when imported (bot starting) to cache the nonce in a local file
+utils.initializeCachedNonce();
 
-  // Make sure the bot has enough Goerli ETH to send
-  const faucetReady = await utils.faucetIsReady(process.env.FAUCET_ADDRESS, 32);
-  if (!faucetReady) {
-    console.log("Faucet does not have enough ETH.");
+module.exports = {
+  runGoerliFaucet: async (message, address, hexData, runCustomChecks) => {
+    let embed = new Discord.MessageEmbed();
+    console.log("DiscordID "+message.author.id +" is requesting " + 32 + " goerli eth.  Custom checks: " + runCustomChecks);
 
-    if (message) {
-      embed.setDescription("**Operation Unsuccessful**\nThe Bot does not have enough Goerli ETH.  Please contact the maintainers.").
-      setTimestamp().setColor(0xff1100);
-      await message.lineReply(embed);
+    // Make sure the bot has enough Goerli ETH to send
+    const faucetReady = await utils.faucetIsReady(process.env.FAUCET_ADDRESS, 32);
+    if (!faucetReady) {
+      console.log("Faucet does not have enough ETH.");
+      if (message) {
+        embed.setDescription("**Operation Unsuccessful**\nThe Bot does not have enough Goerli ETH.  Please contact the maintainers.").
+        setTimestamp().setColor(0xff1100);
+        await message.lineReply(embed);
+      }
+      return;
     }
-    return;
-  }
 
-  const receiverEligible = await receiverIsEligible(message.author.id, address, 32, runCustomChecks);
-  if (receiverEligible === null){
-    if (message) {
-      embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')
-          .setTimestamp().setColor(3447003);
-      await message.lineReply(embed);
+    const receiverEligible = await receiverIsEligible(message.author.id, address, 32, runCustomChecks);
+    if (receiverEligible === null){
+      if (message) {
+        embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')
+            .setTimestamp().setColor(3447003);
+        await message.lineReply(embed);
+      }
+      return;
     }
-    return;
-  }
-  if (receiverEligible === 401){
-    //Daily of goerli recieved
-    const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their daily quota of goerliETH.`;
-    console.log(m);
-    if (message) {
-      embed.setDescription(m)
-          .setTimestamp().setColor(3447003);
-      await message.lineReply(embed);
+    if (receiverEligible === 401){
+      //Daily of goerli recieved
+      const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their daily quota of goerliETH.`;
+      console.log(m);
+      if (message) {
+        embed.setDescription(m)
+            .setTimestamp().setColor(3447003);
+        await message.lineReply(embed);
+      }
+      return;
     }
-    return;
-  }
 
-  if (receiverEligible === 402){
-    //Weekly quota of goerli reached
-    const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their weekly quota of goerliETH.`;
+    if (receiverEligible === 402){
+      //Weekly quota of goerli reached
+      const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their weekly quota of goerliETH.`;
 
-    console.log(m);
+      console.log(m);
 
-    if (message) {
-      embed.setDescription(m)
-          .setTimestamp().setColor(3447003);
-      await message.lineReply(embed);
+      if (message) {
+        embed.setDescription(m)
+            .setTimestamp().setColor(3447003);
+        await message.lineReply(embed);
+      }
+      return;
     }
-    return;
-  }
   console.log("Checks passed - sending to " +  message.author.id);
   if (message) {
     embed.setDescription("**Operation Successful**\nChecks passed - sending...").
@@ -110,8 +112,8 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
     
   }
   await utils.incrementCachedNonce();
+  }
 }
-
 // This runs once when imported (bot starting) to cache the nonce in a local file
 utils.initializeCachedNonce();
 

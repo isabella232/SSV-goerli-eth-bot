@@ -1,11 +1,14 @@
 require('dotenv').config();
+require('./db');
 
 const Discord = require('discord.js')
 const goerliBot = require('./goerliBot.js');
 require('discord-reply');
 const bot = new Discord.Client();
 const web3 = require('web3');
-require('./db');
+
+
+const adminID = [ 695568381591683162, 636950487089938462, 844110609142513675, 724238721028980756, 135786298844774400 ]
 const COMMAND_PREFIX = '+goerlieth';
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle('SSV Goerli Deposit Bot').setColor(3447003)
     .setDescription("Welcome to the Deposit Bot for **ssv.network Incentivezed Testnet**.\nThis **BOT** will make a **32 goerli** deposit to your validator.\n\n**BOT rules:**\n**1.**\nOne message can be sent every 6 hours, please make sure to read and understand how the bot works before you continue.\n**2.**\n Each user is entitled to 1 deposit per 24 hours.\n**3.**\nTrying to abuse the bot will result in a **ban**, **disqualification** from the testnet and **block**.\n\n**To generate HEX data for your deposit:**\n**1.**\nGet to the validator deposit stage on: https://prater.launchpad.ethereum.org/en/overview and change `disabled` to `enabled` by `inspecting` the button (on the launchpad page)https://i.imgur.com/izYw5QU.gif\n**2.**\n On the send deposit page - once Metamask is open, open the Data page and copy the Hex Data. https://i.imgur.com/2XGOT9H.gif. Now move to Discord Bot Channel.\n\n**Guide:**")
@@ -13,12 +16,7 @@ const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle('SSV Goerli De
     .addField("+goerlieth help", 'Help with the bot.')
     .addField("+goerlieth mod", "Ping the admins for help if the **BOT** is malfunctioning (spamming this will result in a **BAN**)")
 
-let yourBotToken = process.env.DISCORD_BOT_TOKEN;
-bot.login(yourBotToken);
-bot.commands = new Discord.Collection();
-bot.commands.set(goerliBot.name, goerliBot);
-
-bot.on('ready', () => {
+bot.on('ready', async function() {
   console.log('I am ready!');
 });
 
@@ -31,7 +29,6 @@ bot.on('message', async function (message) {
     let embed = new Discord.MessageEmbed()
 
     const args = (message.content.substring(COMMAND_PREFIX.length).split(/ |\n/)).filter(n=>n)
-    // const addressExists = db.checkAddressExists(BigInt(message.author.id)).then(function (result){return result;})
 
     if (args[0] && args[1] && args[0].startsWith('0x') && args[1].startsWith('0x')){
       const isAddress = web3.utils.isAddress(args[0]);
@@ -44,8 +41,8 @@ bot.on('message', async function (message) {
         embed.setDescription('**Error**\nInvalid `Address`.')
             .setColor(0xff1100).setTimestamp();
         await message.lineReply(embed);
-        return
-      }else if (!isHex){
+        return;
+      } else if (!isHex){
         embed.setDescription('**Error**\nInvalid `Hex`.')
             .setColor(0xff1100).setTimestamp();
         await message.lineReply(embed);
@@ -61,7 +58,6 @@ bot.on('message', async function (message) {
           .setColor(0xff1100).setTimestamp();
       await message.lineReply(embed);
       return
-
     }else if (!args[1]){
       if (args[0] && web3.utils.isHex(args[0])){
         embed.setDescription('**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.')
@@ -104,7 +100,11 @@ bot.on('message', async function (message) {
     }
   } catch (e) {
     console.log(e);
-    let embed = new Discord.MessageEmbed().setDescription('**Error**\nSomething went wrong. If this continues, please contact the mods of this bot by using command: `!mod`').setColor(0xff1100).setTimestamp();
+    let embed = new Discord.MessageEmbed().setDescription('**Error**\nSomething went wrong. If this continues,' +
+        ' please contact the mods of this bot by using command: `!mod`').setColor(0xff1100).setTimestamp();
     await message.lineReply(embed);
   }
 });
+
+
+bot.login(process.env.DISCORD_BOT_TOKEN);
