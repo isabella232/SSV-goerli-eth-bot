@@ -367,13 +367,6 @@
   dependencies:
     "follow-redirects" "^1.14.4"
 
-"axios@^0.21.2":
-  "integrity" "sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg=="
-  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.4.tgz"
-  "version" "0.21.4"
-  dependencies:
-    "follow-redirects" "^1.14.0"
-
 "base-x@^3.0.2", "base-x@^3.0.8":
   "integrity" "sha512-H7JU6iBHTal1gp56aKoaa//YUxEaAOUiydvrV/pILqIHXTtqxSkATOnDA2u+jZ/61sD+L/412+7kzXRtWukhpQ=="
   "resolved" "https://registry.npmjs.org/base-x/-/base-x-3.0.9.tgz"
@@ -1136,7 +1129,7 @@
     "statuses" "~1.5.0"
     "unpipe" "~1.0.0"
 
-"follow-redirects@^1.14.0", "follow-redirects@^1.14.4":
+"follow-redirects@^1.14.4":
   "integrity" "sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ=="
   "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.7.tgz"
   "version" "1.14.7"
@@ -1195,14 +1188,6 @@
   "integrity" "sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A=="
   "resolved" "https://registry.npmjs.org/function-bind/-/function-bind-1.1.1.tgz"
   "version" "1.1.1"
-
-"gas-price-oracle@^0.4.4":
-  "integrity" "sha512-alAHLiZmPJ+GxKvujZZzEY8NRPqgGGHmDQUPFTa6HAMFB4LR/T6ShTDbqQzsdeWLPSw/j8/Gux0ZSC2AsPK+Hg=="
-  "resolved" "https://registry.npmjs.org/gas-price-oracle/-/gas-price-oracle-0.4.4.tgz"
-  "version" "0.4.4"
-  dependencies:
-    "axios" "^0.21.2"
-    "bignumber.js" "^9.0.0"
 
 "get-intrinsic@^1.0.2", "get-intrinsic@^1.1.0", "get-intrinsic@^1.1.1":
   "integrity" "sha512-kWZrnVM42QCiEA2Ig1bG8zjoIMOgxWwYCEeNdwY6Tv/cOSeGpcoX4pXHfKUxNKVoArnrEr2e9srnAxxGIraS9Q=="

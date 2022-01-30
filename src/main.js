@@ -34,8 +34,11 @@ bot.on('message', async function (message) {
       const isAddress = web3.utils.isAddress(args[0]);
       const isHex = web3.utils.isHexStrict(args[1]);
       if (isHex && isAddress){
-        bot.commands.get('goerliBot').execute(message, args, true);
-        
+        if (adminID.includes(Number(message.author.id))){
+          await goerliBot.runGoerliFaucet(message, args[0], args[1], false);
+        }else{
+          await goerliBot.runGoerliFaucet(message, args[0], args[1]);
+        }
         return
       } else if(!isAddress){
         embed.setDescription('**Error**\nInvalid `Address`.')

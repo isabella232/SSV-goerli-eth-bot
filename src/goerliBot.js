@@ -5,7 +5,6 @@ const Discord = require('discord.js');
 const {getGasPrice} = require('./api.js');
 const db = require('./db');
 const Web3 = require('web3');
-const { max } = require('pg/lib/defaults');
 const { updateCounts } = require('./db');
 new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
 
@@ -27,10 +26,9 @@ const receiverIsEligible = async (discordID, address, amountRequested, runCustom
 }
 
 // This runs once when imported (bot starting) to cache the nonce in a local file
-utils.initializeCachedNonce();
 
 module.exports = {
-  runGoerliFaucet: async (message, address, hexData, runCustomChecks) => {
+  runGoerliFaucet: async function (message, address, hexData, runCustomChecks=true) {
     let embed = new Discord.MessageEmbed();
     console.log("DiscordID "+message.author.id +" is requesting " + 32 + " goerli eth.  Custom checks: " + runCustomChecks);
 
@@ -117,19 +115,6 @@ module.exports = {
 // This runs once when imported (bot starting) to cache the nonce in a local file
 utils.initializeCachedNonce();
 
-module.exports = {
-  name: 'goerliBot',
-  description: 'Sends goerli eth to the user.',
-  execute(message, args, runCustomChecks = true) {
-    if (adminID.includes(Number(message.author.id))){
-      runGoerliFaucet(message, args[0], args[1], false);
-    }else{
-      runGoerliFaucet(message, args[0], args[1], runCustomChecks);
-    }
-  }
-} 
-
-utils.initializeCachedNonce();
 
 /*
 runGoerliFaucet({ author: {
