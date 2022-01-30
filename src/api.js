@@ -5,8 +5,6 @@ const { ETHERSCAN_API_KEY, ETHERSCAN_API_URL, FAUCET_ADDRESS, GOERLI_API_URL } =
 const request = rateLimit(axios.create(), {maxRequests: 5, perMillisecondss: 500})
 const maxTries = 3;
 
-var lastGasPrice = 1500000000000;
-
 const getBlockNumber = async function(time) {
     const url = `${ETHERSCAN_API_URL}?module=block&action=getblocknobytime&timestamp=${time}&closest=before&apikey=${ETHERSCAN_API_KEY}`
     return (await (request.get(url))).data.result;
@@ -20,13 +18,13 @@ const getTransactions = async function (address, fromBlock) {
 
 module.exports = {
     checkDeposit: async function(address) {
-        var count = 0
+        let count = 0
         while (true) {
             try {
-                var time = new Date();
+                let time = new Date();
                 time.setDate(time.getDate() - 2);
                 const fromBlock = await getBlockNumber(Math.floor(time.getTime()/1000))
-                var depositedTxArray = []
+                let depositedTxArray = []
                 const tx = await getTransactions(address, fromBlock);
                 if (tx) {
                     for (count = 0; count < tx.length; count++){
@@ -43,7 +41,7 @@ module.exports = {
 
     },
     getBalance: async function (address){
-        var count = 0;
+        let count = 0;
         while (true){
             try {
                 //const request = await rateLimit(axios.create(), {maxRequests: 5, perMillisecondss: 1000, maxRPS: 1});
@@ -57,16 +55,15 @@ module.exports = {
     getGasPrice: async function(){
         try{
             const url = `${GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API_KEY}`
-            lastGasPrice =  (await axios.get(url)).data.result.FastGasPrice
-            console.log(lastGasPrice)
+            let lastGasPrice =  (await axios.get(url)).data.result.FastGasPrice
             if (isNaN(lastGasPrice)){
-                return "1500000000000"
+                return 1600000000000
             }
-            return Number(lastGasPrice + '0000000000')
+            let gas = Number(lastGasPrice + '0000000000');
+            return gas + gas * 0.15
         }
         catch{
-            return lastGasPrice
+            return 1600000000000
         }
     }
-    
 }
