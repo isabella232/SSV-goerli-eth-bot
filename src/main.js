@@ -32,7 +32,7 @@ let embed = new Discord.MessageEmbed()
 
 pool.on('notification', async (data) => {
   const payload = JSON.parse(data.payload);
-  console.log(`row added to ip table | successfully verified ${payload}`)
+  console.log('row added to ip table | successfully verified: ', payload)
   let fetchUser = bot.users.fetch(Number(payload.id));
   fetchUser.then(async function (user){
     await user.send(embed.setDescription('**Operation Successful**\nYou were successfully verified!'));
