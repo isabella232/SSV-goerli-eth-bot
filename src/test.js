@@ -1,17 +1,24 @@
+const { GasPriceOracle } = require('gas-price-oracle');
 
-const { ETHERSCAN_API_KEY, ETHERSCAN_API_URL, FAUCET_ADDRESS, GOERLI_API_URL } = process.env;
-console.log(ETHERSCAN_API_KEY,GOERLI_API_URL)
-
-const axios = require('axios');
-
-async function getGasPrice(){
-        const url = `https://api-goerli.etherscan.io/api
-        ?module=gastracker&action=gasoracle&apikey==Y9Y41PJZ7KUJP3SVPZRZ29T99QEAJ434KZ`
-        lastGasPrice =  (await axios.get(url))
-        console.log(lastGasPrice)
-        if (isNaN(lastGasPrice)){
-            return "1500000000000"
-        }
-        return Number(lastGasPrice + '0000000000')
-}
-getGasPrice()
+const options = {
+        chainId: 1,
+        defaultRpc: 'https://api.mycryptoapi.com/eth',
+        timeout: 10000,
+        defaultFallbackGasPrices: {
+                instant: 28,
+                fast: 22,
+                standard: 17,
+                low: 11,
+        },
+};
+const oracle = new GasPriceOracle(options);
+// optional fallbackGasPrices
+const fallbackGasPrices = {
+        instant: 70,
+        fast: 31,
+        standard: 20,
+        low: 7,
+};
+oracle.gasPrices(fallbackGasPrices).then(gasPrices => {
+        console.log(gasPrices); // { instant: 50, fast: 21, standard: 10, low: 3 }
+});

@@ -1,7 +1,5 @@
 require('dotenv').config({path: '../.env'})
-const { checkDeposit } = require('./api.js');
 const { Pool } = require('pg');
-const { max } = require('pg/lib/defaults');
 
 let pool = new Pool({
     user: process.env.DB_USERNAME,
@@ -14,7 +12,7 @@ pool.connect();
 
 pool.query('SELECT NOW()', (err, res) => {
     if(err){
-        console.log('Database connection failed',err);
+        console.log('Database connection failed: ', err);
     }
     else {
         console.log('Database connected!');
@@ -41,6 +39,21 @@ const createLogTable = `create table if not exists txlogs(
 )
 `
 
+const createIpTable = `create table if not exists ip(
+    discord_id bigint,
+    ip varchar
+)
+`
+
+pool.query(createIpTable, (err, res) =>{
+    if(err){
+        console.log('ip table initialization failed.')
+    }
+    else  {
+        console.log('ip table initialized!')
+    }
+})
+
 pool.query(createTable, (err, res) => {
     if(err){
         console.log('depositor table creation failed',err);
@@ -59,7 +72,30 @@ pool.query(createLogTable, (err, res) =>{
     }
 })
 
-const depositAmount = process.env.DEPOSIT_AMOUNT; //should be 32000000000000000000
+pool.query(
+    `CREATE OR REPLACE FUNCTION public.notify_event() RETURNS trigger LANGUAGE plpgsql
+ AS $function$
+ BEGIN
+    PERFORM pg_notify('new_event', row_to_json(NEW)::text);
+    RETURN NULL;
+ END;
+ $function$`, (err, res)=>{
+        if (err){
+            console.log('create pg_listener failed: ', err);
+        }else console.log('pg_listener_function created!')
+    }
+);
+
+pool.query(
+    `CREATE TRIGGER update_ip AFTER INSERT ON ip FOR EACH ROW EXECUTE PROCEDURE notify_event()`
+    , (err, res)=>{
+        if (err){
+            console.log('trigger creation failed: ', err);
+        }else console.log('trigger created!')
+    }
+);
+
+//should be 32000000000000000000
 const dailyLimit = parseFloat(process.env.DAILY_LIMIT) - 1;
 const weeklyLimit = parseFloat(process.env.WEEKLY_LIMIT) - 1;
 const maxTries = 3;
@@ -125,13 +161,27 @@ module.exports = {
                 if (++count == maxTries) return false;
             }
         }
+    },
+    checkIp: async function(discordID){
+        return await checkIpExists(discordID);
     }
 }
+
 
 async function updateAddress(discordID, address){
     const query = `update depositortest set address=$1 where discordid=$2`
     const vals = [String(address), BigInt(discordID)]
     await pool.query(query, vals);
+}
+
+async function checkIpExists(discordID){
+    const select = `
+        SELECT * FROM ip
+        WHERE discordid = $1
+    `;
+    const value = [BigInt(discordID)]
+    const result = await pool.query(select, value);
+    return result.rows;
 }
 
 async function checkUserExists(discordID){
