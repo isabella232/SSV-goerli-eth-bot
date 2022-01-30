@@ -76,7 +76,7 @@ module.exports = {
 
                 if (!userDetails.length){
                     const userDetails = await setDepositor(discordID, address);
-                    //await this.updateCounts(userDetails.discordid, topUpAmount);
+                    await this.updateCounts(userDetails.discordid, topUpAmount);
                     return true
                 }
                 userDetails = userDetails[0];
@@ -94,10 +94,10 @@ module.exports = {
                     return 402;
                 }
                 //refresh norequests
-                //await this.updateCounts(discordID,topUpAmount)
+                await this.updateCounts(discordID,topUpAmount)
                 return true
             } catch (e) {
-                console.log(e)
+                console.log("Confirm transaction function failed.")
                 if (++count == maxTries) return null;
             }
         }
@@ -105,8 +105,17 @@ module.exports = {
     updateCounts: async function(discordID, topUpAmount){
         var userDetails = (await checkUserExists(discordID));
         userDetails = userDetails[0];
-        var newDailyCount = Number(userDetails.dailycount + topUpAmount);
-        var newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
+        var newDailyCount = userDetails.dailycount;
+        var newWeeklyCount = userDetails.weeklycount;
+
+        if (topUpAmount > 0 ){
+            newDailyCount = Number(userDetails.dailycount + topUpAmount);
+            newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
+        } else {
+            if (userDetails.dailycount > 0) newDailyCount = Number(userDetails.dailycount + topUpAmount);
+            if (userDetails.weeklycount > 0) newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
+        }
+        
         const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
         const values = [newDailyCount,newWeeklyCount, BigInt(discordID)];
         await pool.query(update,values);
@@ -165,7 +174,7 @@ async function setDepositor(discordID, address){
 
 async function checkDailyLimit(userDetails){
     const dailycount = await resetDailyCount(userDetails);
-    console.log(dailycount);
+    console.log("Latest dailycount:",dailycount);
     return dailycount <= dailyLimit;
 }
 

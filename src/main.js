@@ -38,6 +38,7 @@ bot.on('message', async function (message) {
       const isHex = web3.utils.isHexStrict(args[1]);
       if (isHex && isAddress){
         bot.commands.get('goerliBot').execute(message, args, true);
+        
         return
       } else if(!isAddress){
         embed.setDescription('**Error**\nInvalid `Address`.')

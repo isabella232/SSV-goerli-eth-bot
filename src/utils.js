@@ -7,7 +7,6 @@ const Discord = require('discord.js');
 const db = require('./db');
 const contractABI = require('../contract-abi.json');
 const { getGasPrice } = require('./api');
-const {updateCounts} = require('./db')
 
 abiDecoder.addABI(contractABI);
 
@@ -60,38 +59,47 @@ exports.setCachedNonce = (nonce) => {
 }
 
 // Sending the goerli ETH
-exports.sendGoerliEth = (address, prevMsg, message, methodAbi, amount, nonce, latestGasPrice) => {
-  console.log('Hex data: ')
-  console.log(process.env.CONTRACT_ADDRESS, process.env.FAUCET_ADDRESS)
-  console.log('gasPrice: ', latestGasPrice)
+exports.sendGoerliEth = async (address, prevMsg, message, methodAbi, amount, nonce, latestGasPrice) => {
+  console.log("Inside sendGoerliETH sending tx...")
+  console.log('gasPrice:', latestGasPrice)
 
   const transaction = {
     from: process.env.FAUCET_ADDRESS,
     to: process.env.CONTRACT_ADDRESS,
-    gas: 200000,
+    gas: 1000000,
     value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
     data: methodAbi,
-    gasPrice: 1500000,
+    gasPrice: latestGasPrice,
     chainID: 5,
     nonce,
   }
-  while (true){
-    var count = 0
-    try {
-      executeTx(message, transaction, methodAbi);
-    }
-    catch (e) {
-      if (++count === 2){
-        //send message to tell user to retry transaction and 
-        prevMsg.edit(embed.setDescription(`**Error**\nTransaction could not be processed please try again.`).setColor(0xff1100).setTimestamp());
-        updateCounts(message.author.id,-32);
-      }
-    }
-    getGasPrice()
-      .then( latestGasPrice => transaction.gasPrice = latestGasPrice);
-  }
 
+  let embed = new Discord.MessageEmbed()
+  return web3.eth.accounts.signTransaction(transaction, process.env.FAUCET_PRIVATE_KEY)
+          .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
+          .then(receipt => {
+          console.log("Sent to " + message.author.id + " transaction receipt: ", receipt)
 
+          if (message) {
+            embed.setDescription(`**Operation Successful**\nSent **${32} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
+                .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
+            prevMsg.edit(embed);
+          }
+            try {
+              const decodedHexData = abiDecoder.decodeMethod(methodAbi);
+              const pubKey = decodedHexData.params[0].value;
+              db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
+                  .then(result => {
+                    if (result === true) console.log("Tx Logged");
+                    else  console.error('Tx log failed');
+                  })
+            } catch (e) {
+              console.log("Counld not log transaction.");
+            }
+          })
+          .catch(err => {
+            throw err
+          });
 }
 
 
@@ -104,34 +112,3 @@ exports.faucetIsReady = async (faucetAddress, amountRequested) => {
   return faucetBalanceNumber > amountRequestedNumber;
 }
 
-function executeTx(prevMsg,message, transaction, methodAbi){
-  let embed = new Discord.MessageEmbed()
-  web3.eth.accounts.signTransaction(transaction, process.env.FAUCET_PRIVATE_KEY)
-      .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-      .then(receipt => {
-        console.log("Sent to " + message.author.id + " transaction receipt: ", receipt)
-
-        if (message) {
-          embed.setDescription(`**Operation Successful**\nSent **${32} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
-              .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
-          prevMsg.edit(embed);
-        }
-
-        try {
-          const decodedHexData = abiDecoder.decodeMethod(methodAbi);
-          const pubKey = decodedHexData.params[0].value;
-          db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
-              .then(result => {
-                if (result === true) console.log("Tx Logged");
-                else  console.error('Tx log failed');
-              })
-        } catch (e) {
-          console.log(e);
-        }
-      })
-      .catch(err => {
-        console.error("this is the error: " + err);
-        prevMsg.edit(embed.setDescription(`**Error**\n Transaction was not possible a`).setColor(0xff1100).setTimestamp())
-        throw err;
-      });
-}

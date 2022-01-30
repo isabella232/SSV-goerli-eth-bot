@@ -6,12 +6,13 @@ const {getGasPrice} = require('./api.js');
 const db = require('./db');
 const Web3 = require('web3');
 const { max } = require('pg/lib/defaults');
+const { updateCounts } = require('./db');
 new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
 const adminID = [(695568381591683162), (636950487089938462), (844110609142513675), (724238721028980756), (135786298844774400)]
 
 const runCustomEligibilityChecks = async (discordID, address, topUpAmount) => {
   const res = await db.confirmTransaction(discordID, address, topUpAmount);
-  console.log(res)
+  console.log("Confirm Transaction result:",res);
   return res
 
 }
@@ -84,17 +85,29 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
   }
   let msg = await message.lineReply(embed);
   const nonce = utils.getCachedNonce();
-
+  
   try {
-    const latestGasPrice = await getGasPrice();
+    var latestGasPrice = await getGasPrice();
     await utils.sendGoerliEth(address, msg, message, hexData, 32, nonce, latestGasPrice);
   } catch (e) {
-    console.log(e)
-    if (message) {
-      embed.setDescription("**Transaction Failed**\nPlease try again later.").
-      setTimestamp().setColor(0xff1100);
+    console.log("Gas price too low tx was not picked up by miner.")
+    try {
+      latestGasPrice = await getGasPrice()
+      if (message) {
+        embed.setDescription("**Transaction is still being processed**\nPlease continue to wait around ~10 minutes.").
+        setTimestamp().setColor(0xff1100);
+      }
+      await msg.edit(embed);
+      await utils.sendGoerliEth(address, msg, message, hexData, 32, nonce, latestGasPrice);
+    } catch (e) {
+      if (message) {
+        embed.setDescription("**Transaction Failed**\nPlease try again later").
+        setTimestamp().setColor(0xff1100);
+      }
+      await msg.edit(embed);
+      updateCounts(message.author.id,-32);
     }
-    await msg.edit(embed);
+    
   }
   await utils.incrementCachedNonce();
 }
@@ -121,3 +134,42 @@ runGoerliFaucet({ author: {
   id: 419238541009092650
 }}, "0x22895118000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000012016d50bc4caa3c8fadd8d37cfcfcf25d69f73b4324ce54c99c7635b19922a5a400000000000000000000000000000000000000000000000000000000000000030b4de6a58cb0585a52e12b2ecba4a6784934819188ff4c2bce1dd705a0f8c530883dbf507e6dd83cafa0df3555e0b5ee7000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020008494155aba626d93e24a1de2c983e5376ab9e3507fe2b2b671337b1e30d8dd0000000000000000000000000000000000000000000000000000000000000060aff68160310f4fa9975bf5841f2312eaaea73d35bdaa737ed888e368f2215d4bcbf31bff74c4e2626d2845820f25032b129b2f022b6df86c26e8896f016ad17880c215ebf1ecdba693c56f5aae4437154bd7c108b8fc4c32a08fedd1d1e9bcf2", true);
 */
+
+/*
+var latestGasPrice = await getGasPrice();
+  new Promise((resolve, reject) => {
+    const timeoutID = setTimeout(
+      () => reject('longCalculation took too long'),
+      100000
+    );
+
+    utils.sendGoerliEth(address, msg, message, hexData, 32, nonce, latestGasPrice)
+    .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
+    .then(receipt => {
+    console.log("Sent to " + message.author.id + " transaction receipt: ", receipt)
+
+    if (message) {
+      embed.setDescription(`**Operation Successful**\nSent **${32} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
+          .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
+      prevMsg.edit(embed);
+    }
+
+    try {
+      const decodedHexData = abiDecoder.decodeMethod(methodAbi);
+      const pubKey = decodedHexData.params[0].value;
+      db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
+          .then(result => {
+            if (result === true) console.log("Tx Logged");
+            else  console.error('Tx log failed');
+          })
+    } catch (e) {
+      console.log(e);
+    }
+      resolve();
+    })
+    .catch(err => {
+      reject();
+    });
+  })
+  .then(console.log("Tx successful"))
+  .catch(console.log("Failed"))*/
