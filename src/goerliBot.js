@@ -87,11 +87,11 @@ const runGoerliFaucet = async (message, address, hexData, runCustomChecks) => {
 
   try {
     const latestGasPrice = await getGasPrice();
-    await utils.sendGoerliEth(address, msg, message, process.env.FAUCET_ADDRESS, process.env.FAUCET_PRIVATE_KEY, hexData, 32, nonce, latestGasPrice);
+    await utils.sendGoerliEth(address, msg, message, hexData, 32, nonce, latestGasPrice);
   } catch (e) {
     console.log(e)
     if (message) {
-      embed.setDescription("**Transaction Failed**\nPlease try again later").
+      embed.setDescription("**Transaction Failed**\nPlease try again later.").
       setTimestamp().setColor(0xff1100);
     }
     await msg.edit(embed);

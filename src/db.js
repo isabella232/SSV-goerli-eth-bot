@@ -73,9 +73,10 @@ module.exports = {
                 var userDetails = (await checkUserExists(discordID));
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
+
                 if (!userDetails.length){
                     const userDetails = await setDepositor(discordID, address);
-                    await this.updateCounts(userDetails.discordid, topUpAmount);
+                    //await this.updateCounts(userDetails.discordid, topUpAmount);
                     return true
                 }
                 userDetails = userDetails[0];
@@ -93,7 +94,7 @@ module.exports = {
                     return 402;
                 }
                 //refresh norequests
-                await this.updateCounts(discordID,topUpAmount)
+                //await this.updateCounts(discordID,topUpAmount)
                 return true
             } catch (e) {
                 console.log(e)
@@ -102,20 +103,13 @@ module.exports = {
         }
     },
     updateCounts: async function(discordID, topUpAmount){
-        var count = 0;
-        while (true){
-            try{
-                var newDailyCount = Number(userDetails.dailycount + topUpAmount);
-                var newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
-
-                const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
-                const values = [newDailyCount,newWeeklyCount, BigInt(discordID)];
-                await pool.query(update,values);
-                return true
-            } catch (e) {
-                if (++count == maxTries) return false;
-            }
-        }
+        var userDetails = (await checkUserExists(discordID));
+        userDetails = userDetails[0];
+        var newDailyCount = Number(userDetails.dailycount + topUpAmount);
+        var newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
+        const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
+        const values = [newDailyCount,newWeeklyCount, BigInt(discordID)];
+        await pool.query(update,values);
     },
     addLog: async function(discord_id, discord_name,pubKey, etherscan_link, deposit_abi){
         var count = 0;
@@ -189,8 +183,6 @@ async function resetDailyCount(userDetails){
         return dailycount.rows[0].dailycount; //daily limit has been reset
     }
     return userDetails.dailycount;
-
-
 }
 
 async function checkWeeklyLimit(userDetails){

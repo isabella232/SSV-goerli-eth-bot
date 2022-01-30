@@ -1,25 +1,17 @@
-require('dotenv').config({path: '../.env'})
+
+const { ETHERSCAN_API_KEY, ETHERSCAN_API_URL, FAUCET_ADDRESS, GOERLI_API_URL } = process.env;
+console.log(ETHERSCAN_API_KEY,GOERLI_API_URL)
+
 const axios = require('axios');
 
-let defaultGasPrice = 20;
 async function getGasPrice(){
-    try{
-        return axios.get(`https://api-goerli.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API_KEY}`).then(
-            function (result) {
-                return result
-            }
-        )
-    } catch {
-        return 5
-    }
+        const url = `https://api-goerli.etherscan.io/api
+        ?module=gastracker&action=gasoracle&apikey==Y9Y41PJZ7KUJP3SVPZRZ29T99QEAJ434KZ`
+        lastGasPrice =  (await axios.get(url))
+        console.log(lastGasPrice)
+        if (isNaN(lastGasPrice)){
+            return "1500000000000"
+        }
+        return Number(lastGasPrice + '0000000000')
 }
-
-async function init(){
-    let gasPrice = (await getGasPrice()).data.result.FastGasPrice
-    if (isNaN(gasPrice)){
-        gasPrice = defaultGasPrice
-    }
-    console.log(Number(gasPrice))
-}
-
-init()
+getGasPrice()
