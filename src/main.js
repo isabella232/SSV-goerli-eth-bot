@@ -96,4 +96,4 @@ bot.on('message', async function (message) {
         await message.lineReply(embed);
     }
 });
-bot.login(process.env.DISCORD_BOT_TOKEN);
+bot.login(process.env.SSV_DISCORD_BOT_TOKEN);

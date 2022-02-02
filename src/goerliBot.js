@@ -7,7 +7,7 @@ const db = require('./db');
 const Web3 = require('web3');
 const { updateCounts } = require('./db');
 const walletSwitcher = require('./initializers/WalletSwitcher');
-new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
+new Web3(new Web3.providers.HttpProvider(process.env.SSV_INFURA_HTTPS_ENDPOINT));
 
 
 const runCustomEligibilityChecks = async (discordID, address, topUpAmount) => {

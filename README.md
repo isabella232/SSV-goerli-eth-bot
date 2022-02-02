@@ -81,7 +81,6 @@ All values, constants and variables related to ETH, are standardized to 10^18.
 * `FAUCET_PRIVATE_KEY`:  You have to provide the faucet private key here; the private key of the wallet holding the goerli eth you will distribute
 * `DISCORD_BOT_TOKEN`: Bot token generated [here](#create-bot-application).
 * `INFURA_HTTPS_ENDPOINT`: https://goerli.infura.io/v3/1cc5a78e2e72446880dee3ff4b82cae1. Infura HTTPS endpoint from settings on infura.io
-* `NONCE_FILE`: Full path to nonce file location (file does not need to exist, but folder does), i.e. `/Users/hamzaasaad/Documents/GitHub/goerli-eth-bot/nonceFolder/noncefile.txt`
 * `ETHERSCAN_API_KEY`
 * `ETHERSCAN_API_URL`: https://api.etherscan.io/api
 * `DB_USERNAME`: Database username

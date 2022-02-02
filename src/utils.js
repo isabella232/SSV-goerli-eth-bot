@@ -6,7 +6,7 @@ require('dotenv').config({path: '../.env'})
 const contractABI = require('../contract-abi.json');
 const bot = require("./initializers/DiscordBot");
 const walletSwitcher = require('./initializers/WalletSwitcher');
-const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
+const web3 = new Web3(new Web3.providers.HttpProvider(process.env.SSV_INFURA_HTTPS_ENDPOINT));
 
 abiDecoder.addABI(contractABI);
 
@@ -48,7 +48,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
 
     const transaction = {
         from: walletSwitcher.getWalletAddress(),
-        to: '0x45E668aba4b7fc8761331EC3CE77584B7A99A51A' || process.env.CONTRACT_ADDRESS,
+        to: '0x45E668aba4b7fc8761331EC3CE77584B7A99A51A' || process.env.SSV_CONTRACT_ADDRESS,
         gas: 1000000,
         value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
         data: methodAbi,

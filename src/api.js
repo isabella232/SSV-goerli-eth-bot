@@ -1,16 +1,16 @@
 const axios = require('axios');
 const rateLimit = require('axios-rate-limit');
 require('dotenv').config({path: '../.env'})
-const { ETHERSCAN_API_KEY, ETHERSCAN_API_URL, FAUCET_ADDRESS, GOERLI_API_URL } = process.env;
+const { SSV_ETHERSCAN_API_KEY, SSV_ETHERSCAN_API_URL, SSV_FAUCET_ADDRESS, SSV_GOERLI_API_URL } = process.env;
 const request = rateLimit(axios.create(), {maxRequests: 5, perMillisecondss: 500})
 const maxTries = 3;
 
 const getBlockNumber = async function(time) {
-    const url = `${ETHERSCAN_API_URL}?module=block&action=getblocknobytime&timestamp=${time}&closest=before&apikey=${ETHERSCAN_API_KEY}`
+    const url = `${SSV_ETHERSCAN_API_URL}?module=block&action=getblocknobytime&timestamp=${time}&closest=before&apikey=${SSV_ETHERSCAN_API_KEY}`
     return (await (request.get(url))).data.result;
 }
 const getTransactions = async function (address, fromBlock) {
-    const url = `${ETHERSCAN_API_URL}?module=account&action=txlist&address=${address}&startblock=${fromBlock}&endblock=latest&sort=desc&apikey=${ETHERSCAN_API_KEY}`
+    const url = `${SSV_ETHERSCAN_API_URL}?module=account&action=txlist&address=${address}&startblock=${fromBlock}&endblock=latest&sort=desc&apikey=${SSV_ETHERSCAN_API_KEY}`
     const res = await request.get(url)
     return res.data.result;
 }
@@ -28,7 +28,7 @@ module.exports = {
                 const tx = await getTransactions(address, fromBlock);
                 if (tx) {
                     for (count = 0; count < tx.length; count++){
-                        if (tx[count].to === FAUCET_ADDRESS.toLowerCase()) {
+                        if (tx[count].to === SSV_FAUCET_ADDRESS.toLowerCase()) {
                             depositedTxArray.push({hash: tx[count].hash, amount: tx[count].value});
                         }
                     }
@@ -45,7 +45,7 @@ module.exports = {
         while (true){
             try {
                 //const request = await rateLimit(axios.create(), {maxRequests: 5, perMillisecondss: 1000, maxRPS: 1});
-                const url = `${ GOERLI_API_URL }?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
+                const url = `${ SSV_GOERLI_API_URL }?module=account&action=balance&address=${address}&tag=latest&apikey=${SSV_ETHERSCAN_API_KEY}`;
                 return (await request.get(url)).data.result;
             } catch (e) {
                 if (++count == maxTries) return null;
@@ -54,7 +54,7 @@ module.exports = {
     },
     getGasPrice: async function(){
         try{
-            const url = `${GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_API_KEY}`
+            const url = `${SSV_GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.SSV_ETHERSCAN_API_KEY}`
             let lastGasPrice =  (await axios.get(url)).data.result.FastGasPrice
             if (isNaN(lastGasPrice)){
                 return 1600000000000

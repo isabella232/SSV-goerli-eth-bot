@@ -4,9 +4,9 @@
   "main": "main.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/colfax23/rocketpool-goerli-bot.git"
+    "url": "git+https://github.com/bloxapp/SSV-goerli-eth-bot"
   },
-  "author": "Colfax Selby <colfax.selby@gmail.com>",
+  "author": "Guy",
   "license": "MIT",
   "dependencies": {
     "abi-decoder": "^2.4.0",

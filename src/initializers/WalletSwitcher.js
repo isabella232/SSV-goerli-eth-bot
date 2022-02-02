@@ -10,13 +10,13 @@ class WalletSwitcher {
     };
 
     getWalletAddress = () => {
-        if(this.mainWallet) return process.env.FAUCET_ADDRESS
-        return process.env.FAUCET_ADDRESS_2
+        if(this.mainWallet) return process.env.SSV_FAUCET_ADDRESS
+        return process.env.SSV_FAUCET_ADDRESS_2
     };
 
     getWalletPrivateKey = () => {
-        if(this.mainWallet) return process.env.FAUCET_PRIVATE_KEY
-        return process.env.FAUCET_PRIVATE_KEY_2
+        if(this.mainWallet) return process.env.SSV_FAUCET_PRIVATE_KEY
+        return process.env.SSV_FAUCET_PRIVATE_KEY_2
     };
 }
 

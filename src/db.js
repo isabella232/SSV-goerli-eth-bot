@@ -3,11 +3,11 @@ const { Pool } = require('pg');
 const { max } = require('pg/lib/defaults');
 
 let pool = new Pool({
-    user: process.env.DB_USERNAME,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASS,
-    port: process.env.DB_PORT,
+    user: process.env.SSV_DB_USERNAME,
+    host: process.env.SSV_DB_HOST,
+    database: process.env.SSV_DB_DATABASE,
+    password: process.env.SSV_DB_PASS,
+    port: process.env.SSV_DB_PORT,
 })
 pool.connect();
 
@@ -58,8 +58,8 @@ pool.query(createLogTable, (err, res) =>{
     }
 })
 
-const dailyLimit = parseFloat(process.env.DAILY_LIMIT) - 1;
-const weeklyLimit = parseFloat(process.env.WEEKLY_LIMIT) - 1;
+const dailyLimit = parseFloat(process.env.SSV_DAILY_LIMIT) - 1;
+const weeklyLimit = parseFloat(process.env.SSV_WEEKLY_LIMIT) - 1;
 const maxTries = 3;
 
 module.exports = {
