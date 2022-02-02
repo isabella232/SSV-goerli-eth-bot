@@ -140,7 +140,7 @@ spec:
               name: config-secrets
               key: ssv_method_abi
               
-        - name: DEPOSIT AMOUNT
+        - name: DEPOSIT_AMOUNT
           valueFrom:
             secretKeyRef:
               name: config-secrets
