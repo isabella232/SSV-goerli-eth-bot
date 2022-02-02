@@ -44,14 +44,14 @@ bot.on('message', async (message) => {
         let channel = message.channel;
 
         if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
-            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES', 'ADD_REACTIONS']}]);
+            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES']}]);
             channelIsOnline = true;
             return;
         }
 
         if (address === 'start' && adminID.includes(Number(message.author.id))) {
             allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
-            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, allow: ['SEND_MESSAGES', 'ADD_REACTIONS']}]);
+            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, allow: ['SEND_MESSAGES']}]);
             channelIsOnline = false;
             return;
         }

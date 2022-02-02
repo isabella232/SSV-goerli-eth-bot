@@ -20,6 +20,10 @@ const faucetIsReady = async (faucetAddress, amountRequested) => {
     return faucetBalanceNumber > amountRequestedNumber;
 }
 
+const convertToWei = async (amount) => {
+    return web3.utils.toWei(amount, 'gwei');
+};
+
 // Eth
 const getAddressTransactionCount = async (address) => {
     return await web3.eth.getTransactionCount(address);
@@ -58,6 +62,8 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
         nonce,
     }
 
+    console.log(transaction);
+
     try {
         const embed = new Discord.MessageEmbed();
         const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
@@ -89,6 +95,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
 
 module.exports = {
     getNonce,
+    convertToWei,
     faucetIsReady,
     sendGoerliEth,
     getAddressBalance,

@@ -92,7 +92,7 @@ module.exports = {
       const latestGasPrice = await getGasPrice();
       console.log('nonce: ' + nonce);
       console.log('latestGasPrice: ' + latestGasPrice);
-      await utils.sendGoerliEth(address, message, hexData, 0.1, nonce, latestGasPrice);
+      await utils.sendGoerliEth(address, message, hexData, 0.1, nonce, Number(latestGasPrice));
       return true;
     } catch (e) {
       return false;

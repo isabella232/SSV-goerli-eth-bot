@@ -1,4 +1,5 @@
 const axios = require('axios');
+const utils = require('./utils');
 const rateLimit = require('axios-rate-limit');
 require('dotenv').config({path: '../.env'})
 const { SSV_ETHERSCAN_API_KEY, SSV_ETHERSCAN_API_URL, SSV_FAUCET_ADDRESS, SSV_GOERLI_API_URL } = process.env;
@@ -57,13 +58,17 @@ module.exports = {
             const url = `${SSV_GOERLI_API_URL}?module=gastracker&action=gasoracle&apikey=${process.env.SSV_ETHERSCAN_API_KEY}`
             let lastGasPrice =  (await axios.get(url)).data.result.FastGasPrice
             if (isNaN(lastGasPrice)){
-                return 1600000000000
+                console.log('<<<<<<<<<<<<<<<<<<<error1>>>>>>>>>>>>>>>>>>>');
+                return 990000000000
             }
-            let gas = Number(lastGasPrice + '0000000000');
-            return gas + gas * 0.15
+
+            let gas = await utils.convertToWei(lastGasPrice);
+            return gas
         }
-        catch{
-            return 1600000000000
+        catch (e) {
+            console.log(e);
+            console.log('<<<<<<<<<<<<<<<<<<<error2>>>>>>>>>>>>>>>>>>>');
+            return 990000000000
         }
     }
 }

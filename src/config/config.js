@@ -1,6 +1,6 @@
 const config = {
     CHANNEL_ID: '937433019181064252',
-    VERIFIED_ROLE_ID: '936274576801923163',
+    VERIFIED_ROLE_ID: '938466857659293786',
     MESSAGES: {
         MODE: {
             MOD: '**Alerting the Administrators**\n <@&723840404159594496> come check this out!',
