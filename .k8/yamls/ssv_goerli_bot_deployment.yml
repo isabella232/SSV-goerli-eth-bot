@@ -1,5 +1,5 @@
 ---
-apiVersion: apps/v1
+apiVersion: REPLACE_API_VERSION
 kind: Deployment
 metadata:
   labels:
