@@ -1,114 +1,97 @@
-require('dotenv').config({path: '../.env'})
-const abiDecoder = require('abi-decoder');
-const fs = require('fs');
-const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
-const Discord = require('discord.js');
 const db = require('./db');
+const Web3 = require('web3');
+const Discord = require('discord.js');
+const abiDecoder = require('abi-decoder');
+require('dotenv').config({path: '../.env'})
 const contractABI = require('../contract-abi.json');
-const { getGasPrice } = require('./api');
+const bot = require("./initializers/DiscordBot");
+const walletSwitcher = require('./initializers/WalletSwitcher');
+const web3 = new Web3(new Web3.providers.HttpProvider(process.env.INFURA_HTTPS_ENDPOINT));
 
 abiDecoder.addABI(contractABI);
 
+// Validate faucet
+const faucetIsReady = async (faucetAddress, amountRequested) => {
+    const faucetBalance = await getAddressBalance(faucetAddress);
+    console.log("Faucet Balance:", faucetBalance);
+    const faucetBalanceNumber = Number(faucetBalance);
+    const amountRequestedNumber = Number(amountRequested);
+    return faucetBalanceNumber > amountRequestedNumber;
+}
 
 // Eth
-exports.getAddressTransactionCount = async (address) => {
-  const nonce = await web3.eth.getTransactionCount(address);
-  return nonce;
+const getAddressTransactionCount = async (address) => {
+    return await web3.eth.getTransactionCount(address);
 }
 
-exports.getAddressBalance = async (address) => {
-  const balanceWei = await web3.eth.getBalance(address);
-  return web3.utils.fromWei(balanceWei);
+const getAddressBalance = async (address) => {
+    const balanceWei = await web3.eth.getBalance(address);
+    return web3.utils.fromWei(balanceWei);
 }
-
 
 // Math
-exports.incrementHexNumber = (hex) => {
-  var intNonce = parseInt(hex, 16);
-  var intIncrementedNonce = parseInt(intNonce+1, 10);
-  var hexIncrementedNonce = '0x'+ intIncrementedNonce.toString(16);
-
-  return hexIncrementedNonce;
+const incrementHexNumber = (hex) => {
+    const intNonce = parseInt(hex, 16);
+    const intIncrementedNonce = parseInt(intNonce + 1, 10);
+    return '0x' + intIncrementedNonce.toString(16);
 }
 
-
-// Nonce caching
-exports.getCachedNonce = () => {
-  return fs.readFileSync(process.env.NONCE_FILE, 'utf8');
-}
-
-exports.incrementCachedNonce = async () => {
-  const currentNonce = this.getCachedNonce();
-  const incrementedNonce = this.incrementHexNumber(currentNonce);
-
-  this.setCachedNonce(incrementedNonce);
-}
-
-exports.initializeCachedNonce = async () => {
-  const intNextNonceToUse = await this.getAddressTransactionCount(process.env.FAUCET_ADDRESS);
-  const hexNextNonceToUse = '0x'+ intNextNonceToUse.toString(16);
-
-  this.setCachedNonce(hexNextNonceToUse);
-}
-
-exports.setCachedNonce = (nonce) => {
-  fs.writeFile(process.env.NONCE_FILE, nonce, function (err){
-    if (err) throw err;
-  })
+const getNonce = async () => {
+    const intNextNonceToUse = await getAddressTransactionCount(walletSwitcher.getWalletAddress());
+    return '0x' + intNextNonceToUse.toString(16);
 }
 
 // Sending the goerli ETH
-exports.sendGoerliEth = async (address, prevMsg, message, methodAbi, amount, nonce, latestGasPrice) => {
-  console.log("Inside sendGoerliETH sending tx...")
-  console.log('gasPrice:', latestGasPrice)
+const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestGasPrice) => {
+    console.log("Inside sendGoerliETH sending tx...")
+    console.log('gasPrice:', latestGasPrice)
 
-  const transaction = {
-    from: process.env.FAUCET_ADDRESS,
-    to: process.env.CONTRACT_ADDRESS,
-    gas: 1000000,
-    value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
-    data: methodAbi,
-    gasPrice: latestGasPrice,
-    chainID: 5,
-    nonce,
-  }
+    const transaction = {
+        from: walletSwitcher.getWalletAddress(),
+        to: '0x45E668aba4b7fc8761331EC3CE77584B7A99A51A' || process.env.CONTRACT_ADDRESS,
+        gas: 1000000,
+        value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
+        data: methodAbi,
+        gasPrice: latestGasPrice,
+        chainID: 5,
+        nonce,
+    }
 
-  let embed = new Discord.MessageEmbed()
-  return web3.eth.accounts.signTransaction(transaction, process.env.FAUCET_PRIVATE_KEY)
-          .then(signedTx => web3.eth.sendSignedTransaction(signedTx.rawTransaction))
-          .then(receipt => {
-          console.log("Sent to " + message.author.id + " transaction receipt: ", receipt)
-
-          if (message) {
-            embed.setDescription(`**Operation Successful**\nSent **${32} goerli ETH** to <@!${message.author.id}> - please wait a few minutes for it to arrive. To check the details at **etherscan.io**, click [here](https://goerli.etherscan.io/tx/${receipt.transactionHash})`)
-                .setTimestamp().setColor(3447003);   //.setURL("https://goerli.etherscan.io/tx/" + receipt.transactionHash)
-            prevMsg.edit(embed);
-          }
-            try {
-              const decodedHexData = abiDecoder.decodeMethod(methodAbi);
-              const pubKey = decodedHexData.params[0].value;
-              db.addLog(message.author.id, message.author.username, pubKey,`https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
-                  .then(result => {
-                    if (result === true) console.log("Tx Logged");
-                    else  console.error('Tx log failed');
-                  })
-            } catch (e) {
-              console.log("Counld not log transaction.");
-            }
-          })
-          .catch(err => {
-            throw err
-          });
+    try {
+        const embed = new Discord.MessageEmbed();
+        const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
+        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        console.log("Sent to " + message.authorId + " transaction receipt: ", receipt);
+        try {
+            const decodedHexData = abiDecoder.decodeMethod(methodAbi);
+            const pubKey = decodedHexData.params[0].value;
+            const result = await db.addLog(message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
+            if (result === true) console.log("Tx Logged");
+            if (message.authorId) {
+                const channel = bot.channels.cache.find(channel => channel.id === '937433019181064252')
+                if (channel) {
+                    embed.setDescription(`**Operation Successful**\nSent **${32} goerli ETH** to \n<@!${message.authorId}>`).setTimestamp().setColor(3447003);
+                    channel.send(embed)
+                }
+            } else console.error('Tx log failed');
+        } catch (e) {
+            console.log(e);
+            console.log("Counld not log transaction.");
+        }
+    } catch (err) {
+        console.log('<<<<<<<<<<<<<<<<<<<<<<<<<calculate new nonce>>>>>>>>>>>>>>>>>>>>>>>>>');
+        console.log(err);
+        const newNone = await getNonce();
+        await sendGoerliEth(address, message, methodAbi, amount, newNone, latestGasPrice);
+    }
 }
 
-
-// Validate faucet
-exports.faucetIsReady = async (faucetAddress, amountRequested) => {
-  const faucetBalance = await this.getAddressBalance(faucetAddress);
-  console.log("Faucet Balance:",faucetBalance);
-  const faucetBalanceNumber = Number(faucetBalance);
-  const amountRequestedNumber = Number(amountRequested);
-  return faucetBalanceNumber > amountRequestedNumber;
-}
+module.exports = {
+    getNonce,
+    faucetIsReady,
+    sendGoerliEth,
+    getAddressBalance,
+    incrementHexNumber,
+    getAddressTransactionCount
+};
 

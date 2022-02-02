@@ -65,20 +65,20 @@ const maxTries = 3;
 module.exports = {
     confirmTransaction: async function(discordID, address, topUpAmount){
         //add try catch
-        var count = 0
-        while (true){
-            try{
-                var userDetails = (await checkUserExists(discordID));
+        let count = 0
+        while (true) {
+            try {
+                let userDetails = await checkUserExists(discordID);
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
 
-                if (!userDetails.length){
+                if (!userDetails.length) {
                     const userDetails = await setDepositor(discordID, address);
                     await this.updateCounts(userDetails.discordid, topUpAmount);
                     return true
                 }
                 userDetails = userDetails[0];
-                if (userDetails.address !== address){
+                if (userDetails.address !== address) {
                     await updateAddress(discordID, address)
                     userDetails.address = address
                 }
@@ -92,7 +92,7 @@ module.exports = {
                     return 402;
                 }
                 //refresh norequests
-                await this.updateCounts(discordID,topUpAmount)
+                await this.updateCounts(discordID, topUpAmount)
                 return true
             } catch (e) {
                 console.log("Confirm transaction function failed.")
