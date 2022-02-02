@@ -1,0 +1,164 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ssv-goerli-bot
+  name: ssv-goerli-bot
+  namespace: REPLACE_NAMESPACE
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ssv-goerli-bot
+  template:
+    metadata:
+      labels:
+        app: ssv-goerli-bot
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/role
+                operator: In
+                values:
+                - ssv-main      
+      containers:
+      - name: ssv-goerli-bot
+        image: REPLACE_DOCKER_REPO:REPLACE_IMAGETAG
+        imagePullPolicy: Always
+        env:
+        - name: DISCORD_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_discord_bot_toket
+
+        - name: FAUCET_ADDRESS
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_faucet_address
+              
+        - name: CONTRACT_ADDRESS
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_contract_address
+
+        - name: FAUCET_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_faucet_private_key
+
+        - name: FAUCET_ADDRESS_2
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_faucet_address_2
+
+        - name: FAUCET_PRIVATE_KEY_2
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_faucet_private_key_2                            
+
+        - name: INFURA_HTTPS_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_infura_https_endpoint
+
+        - name: ETHERSCAN_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_etherscan_api_key
+
+        - name: ETHERSCAN_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_etherscan_api_url
+              
+        - name: GOERLI_API_URL
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_goerli_api_url
+                            
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_db_port
+
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_db_name
+
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_db_username
+              
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_db_pass
+              
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_db_host
+              
+        - name: DAILY_LIMIT
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_daily_limit
+              
+        - name: WEEKLY_LIMIT
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_weekly_limit
+              
+        - name: METHOD_ABI
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_method_abi
+              
+        - name: DEPOSIT AMOUNT
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_deposit_amount
+
+        - name: MAX_DEPOSIT_AMOUNT
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_max_deposit_amount     
+
+        - name: REDIS_URI
+          valueFrom:
+            secretKeyRef:
+              name: config-secrets
+              key: ssv_redis_uri                     
+
+      tolerations:
+      - effect: NoSchedule
+        key: kubernetes.io/role
+        operator: Exists            
