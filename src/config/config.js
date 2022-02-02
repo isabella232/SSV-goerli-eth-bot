@@ -13,7 +13,7 @@ const config = {
             SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE: '**Error**\nSomething went wrong while confirming your transaction please try again.',
             FAUCET_DONT_HAVE_ETH: '"**Operation Unsuccessful**\\nThe Bot does not have enough Goerli ETH.  Please contact the maintainers."',
             CONTACT_THE_MODS: '**Error**\nSomething went wrong. If this continues, please contact the mods of this bot by using command: `!mod`',
-            INVALID_NUMBER_OF_ARGUMENTS_ADDRESS: '**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.'
+            INVALID_NUMBER_OF_ARGUMENTS_ADDRESS: '**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.',
             REACHED_DAILY_GOERLI_ETH: (authorId) => {return `**Operation Unsuccessful**\n<@!${authorId}> has reached their daily quota of goerliETH.`},
         },
         SUCCESS: {
