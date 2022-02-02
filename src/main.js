@@ -5,6 +5,7 @@ const web3 = require('web3');
 const redisStore = require('./redis');
 const Logger = require('./logger.js');
 const Discord = require('discord.js');
+const config = require('./config/config');
 const goerliBot = require('./goerliBot.js');
 const bot = require('./initializers/DiscordBot');
 const queueHandler = require('./queueHandler.js');
@@ -15,7 +16,7 @@ const title = 'SSV Goerli Deposit Bot';
 const adminID = [695568381591683162, 636950487089938462, 836513795194355765, 844110609142513675, 724238721028980756, 135786298844774400]
 
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(3447003)
-    .setDescription("Welcome to the Deposit Bot for **ssv.network Incentivezed Testnet**.\nThis **BOT** will make a **32 goerli** deposit to your validator.\n\n**BOT rules:**\n**1.**\nOne message can be sent every 6 hours, please make sure to read and understand how the bot works before you continue.\n**2.**\n Each user is entitled to 1 deposit per 24 hours.\n**3.**\nTrying to abuse the bot will result in a **ban**, **disqualification** from the testnet and **block**.\n\n**To generate HEX data for your deposit:**\n**1.**\nGet to the validator deposit stage on: https://prater.launchpad.ethereum.org/en/overview and change `disabled` to `enabled` by `inspecting` the button (on the launchpad page)https://i.imgur.com/izYw5QU.gif\n**2.**\n On the send deposit page - once Metamask is open, open the Data page and copy the Hex Data. https://i.imgur.com/2XGOT9H.gif. Now move to Discord Bot Channel.\n\n**Guide:**")
+    .setDescription(config.MESSAGES.MODE.HELP)
     .addField("+goerlieth <address> <hex-data>", 'To start you need to register the **wallet address** you used to generate the **hex** and the **hex** itself.')
     .addField("+goerlieth help", 'Help with the bot.')
     .addField("+goerlieth mod", "Ping the admins for help if the **BOT** is malfunctioning (spamming this will result in a **BAN**)")
@@ -43,13 +44,10 @@ bot.on('message', async function (message) {
         }
 
         // check user's params
-        if (address === 'mod') text = '**Alerting the Administrators**\n <@&723840404159594496> come check this out!'
-        if (!address) text = '**Error**\nNo arguments provided. Please check the guide.';
-        if (!hexData && address && web3.utils.isAddress(address)){
-            text = '**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.';
-        } else if (!hexData && address && web3.utils.isHex(address)) {
-            text = '**Error**\nInvalid number of arguments. Please provide your `address` **first** then your `hex`.';
-        }
+        if (address === 'mod') text = config.MESSAGES.MODE.MOD;
+        if (!address) text = config.MESSAGES.ERRORS.NO_ADDRESS;
+        if (!hexData && address && web3.utils.isAddress(address)) text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_HEX;
+        if (!hexData && address && web3.utils.isHex(address)) text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS;
 
         if (address && hexData) {
             const isHex = web3.utils.isHexStrict(hexData);
@@ -62,7 +60,7 @@ bot.on('message', async function (message) {
                 if (!walletIsReady) {
                     console.log("Faucet does not have enough ETH.");
                     if (message) {
-                        embed.setDescription("**Operation Unsuccessful**\nThe Bot does not have enough Goerli ETH.  Please contact the maintainers.").setTimestamp().setColor(0xff1100);
+                        embed.setDescription(config.MESSAGES.ERRORS.FAUCET_DONT_HAVE_ETH).setTimestamp().setColor(0xff1100);
                         await message.lineReply(embed);
                     }
                     return;
@@ -75,24 +73,24 @@ bot.on('message', async function (message) {
                     username: message.author.username
                 }, address, hexData);
             }
-        } else if (!isAddress) {
-            text = '**Error**\nInvalid `Address`.';
-        } else if (!isHex) {
-            text = '**Error**\nInvalid `Hex`.';
-        } else {
-            text = '**Error**\nUnknown error occurred.';
+            if (!isAddress) {
+                text = config.MESSAGES.ERRORS.INVALID_ADDRESS;
+            } else if (!isHex) {
+                text = config.MESSAGES.ERRORS.INVALID_HEX;
+            } else {
+                text = config.MESSAGES.ERRORS.UNKNOWN_ERROR;
+            }
         }
 
 
-        if(text) {
+        if (text) {
             embed.setDescription(text).setColor(textColor).setTimestamp();
             await message.lineReply(embed);
         }
 
     } catch (e) {
         Logger.log(e);
-        const embed = new Discord.MessageEmbed().setDescription('**Error**\nSomething went wrong. If this continues,' +
-            ' please contact the mods of this bot by using command: `!mod`').setColor(0xff1100).setTimestamp();
+        const embed = new Discord.MessageEmbed().setDescription(config.MESSAGES.ERRORS.CONTACT_THE_MODS).setColor(0xff1100).setTimestamp();
         await message.lineReply(embed);
     }
 });

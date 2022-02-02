@@ -3,7 +3,9 @@ const redis = require('redis');
 class Redis {
     constructor() {
         this.client = redis.createClient();
-        this.client.connect();
+        this.client.connect({
+            url: process.env.SSV_REDIS_URI
+        });
         // this.client.del('queue_next_index')
     }
 
