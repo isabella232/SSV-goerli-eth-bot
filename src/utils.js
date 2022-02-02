@@ -2,9 +2,10 @@ const db = require('./db');
 const Web3 = require('web3');
 const Discord = require('discord.js');
 const abiDecoder = require('abi-decoder');
+const config = require('./config/config');
 require('dotenv').config({path: '../.env'})
-const contractABI = require('../contract-abi.json');
 const bot = require("./initializers/DiscordBot");
+const contractABI = require('../contract-abi.json');
 const walletSwitcher = require('./initializers/WalletSwitcher');
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.SSV_INFURA_HTTPS_ENDPOINT));
 
@@ -70,7 +71,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === '937433019181064252')
                 if (channel) {
-                    embed.setDescription(`**Operation Successful**\nSent **${32} goerli ETH** to \n<@!${message.authorId}>`).setTimestamp().setColor(3447003);
+                    embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId)).setTimestamp().setColor(3447003);
                     channel.send(embed)
                 }
             } else console.error('Tx log failed');

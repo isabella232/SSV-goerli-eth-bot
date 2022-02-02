@@ -3,6 +3,7 @@ require('dotenv').config({path: '../.env'})
 const utils = require('./utils.js');
 const Discord = require('discord.js');
 const {getGasPrice} = require('./api.js');
+const config = require("./config/config");
 const db = require('./db');
 const Web3 = require('web3');
 const { updateCounts } = require('./db');
@@ -47,7 +48,7 @@ module.exports = {
     const receiverEligible = await receiverIsEligible(message.author.id, address, 32, runCustomChecks);
     if (receiverEligible === null) {
       if (message) {
-        embed.setDescription('**Error**\nSomething went wrong while confirming your transaction please try again.')
+        embed.setDescription(Config.MESSAGES.ERRORS.SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE)
             .setTimestamp().setColor(3447003);
         await message.lineReply(embed);
       }
@@ -55,7 +56,7 @@ module.exports = {
     }
     if (receiverEligible === 401) {
       //Daily of goerli recieved
-      const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their daily quota of goerliETH.`;
+      const m = config.MESSAGES.ERRORS.REACHED_DAILY_GOERLI_ETH(message.author.id);
       console.log(m);
       if (message) {
         embed.setDescription(m)
