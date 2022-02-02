@@ -2,6 +2,7 @@ require('discord-reply');
 require('dotenv').config();
 require('./db');
 const web3 = require('web3');
+const utils = require('./utils');
 const redisStore = require('./redis');
 const Logger = require('./logger.js');
 const Discord = require('discord.js');
@@ -9,11 +10,15 @@ const config = require('./config/config');
 const goerliBot = require('./goerliBot.js');
 const bot = require('./initializers/DiscordBot');
 const queueHandler = require('./queueHandler.js');
+const walletSwitcher = require("./initializers/WalletSwitcher");
+
+let allowedValidatorsAmount;
+let channelIsOnline = true;
 
 const textColor = 0xff1100;
 const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
-const adminID = [695568381591683162, 636950487089938462, 836513795194355765, 844110609142513675, 724238721028980756, 135786298844774400]
+const adminID = [844110609142513675, 836513795194355765, 724238721028980756, 876421771400740874];
 
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(3447003)
     .setDescription(config.MESSAGES.MODE.HELP)
@@ -22,11 +27,12 @@ const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColo
     .addField("+goerlieth mod", "Ping the admins for help if the **BOT** is malfunctioning (spamming this will result in a **BAN**)")
 
 bot.on('ready', async function () {
+    allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
     queueHandler.executeQueueList();
     Logger.log('I am ready!');
 })
 
-bot.on('message', async function (message) {
+bot.on('message', async (message) => {
     try {
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
 
@@ -35,6 +41,20 @@ bot.on('message', async function (message) {
         const args = (message.content.substring(COMMAND_PREFIX.length).split(/ |\n/)).filter(n => n)
         const address = args[0];
         const hexData = args[1];
+        let channel = message.channel;
+
+        if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
+            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES', 'ADD_REACTIONS']}]);
+            channelIsOnline = true;
+            return;
+        }
+
+        if (address === 'start' && adminID.includes(Number(message.author.id))) {
+            allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
+            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, allow: ['SEND_MESSAGES', 'ADD_REACTIONS']}]);
+            channelIsOnline = false;
+            return;
+        }
 
         // check if user request other commands
         if (address === 'help') {
@@ -67,13 +87,12 @@ bot.on('message', async function (message) {
                 }
                 const userEligible = await goerliBot.checkUserEligibility(message, address, withCustomChecks);
                 if (!userEligible) return;
-                text = `\n<@!${message.author.id}>** Processing Transaction**`
+                text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
                 await redisStore.addToQueue({
                     authorId: message.author.id,
                     username: message.author.username
                 }, address, hexData);
-            }
-            if (!isAddress) {
+            } else if (!isAddress) {
                 text = config.MESSAGES.ERRORS.INVALID_ADDRESS;
             } else if (!isHex) {
                 text = config.MESSAGES.ERRORS.INVALID_HEX;
@@ -94,4 +113,12 @@ bot.on('message', async function (message) {
         await message.lineReply(embed);
     }
 });
+
+async function getAmountOfValidatorsAllowed() {
+    const itemsInQueue = (await redisStore.getQueueItems()).length
+    const addressBalance = Number(await utils.getAddressBalance(walletSwitcher.getWalletAddress()));
+    console.log('Amount of validators able to register: ', (addressBalance / 32 - (itemsInQueue * 32)).toFixed())
+    return (addressBalance / 32 - itemsInQueue).toFixed();
+}
+
 bot.login(process.env.SSV_DISCORD_BOT_TOKEN);

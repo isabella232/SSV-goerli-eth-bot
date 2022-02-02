@@ -8,7 +8,7 @@ class QueueHandler {
     }
 
     executeQueueList = async () => {
-        const itemsKeys = await this.redisStore.client.keys('queue_item_*')
+        const itemsKeys = await this.redisStore.getQueueItems();
         itemsKeys.sort((a, b) => {
             const aItem = Number(a.substring('queue_item_'.length));
             const bItem = Number(b.substring('queue_item_'.length));

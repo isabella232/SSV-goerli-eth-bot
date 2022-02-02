@@ -30,11 +30,11 @@ const receiverIsEligible = async (discordID, address, amountRequested, runCustom
 
 const checkWalletIsReady = async () => {
   let walletIsReady = await utils.faucetIsReady(walletSwitcher.getWalletAddress(), 32);
-  if (!walletIsReady && walletSwitcher.mainWallet) {
-    console.log('<<<<<<<<<<<<Switche Wallet>>>>>>>>>>>>');
-    walletSwitcher.switchToBackup(true);
-    walletIsReady = await utils.faucetIsReady(walletSwitcher.getWalletAddress(), 32);
-  }
+  // if (!walletIsReady && walletSwitcher.mainWallet) {
+  //   console.log('<<<<<<<<<<<<Switche Wallet>>>>>>>>>>>>');
+  //   walletSwitcher.switchToBackup(true);
+  //   walletIsReady = await utils.faucetIsReady(walletSwitcher.getWalletAddress(), 32);
+  // }
   return walletIsReady;
 }
 
