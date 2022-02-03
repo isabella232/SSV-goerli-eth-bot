@@ -54,9 +54,9 @@ module.exports = {
       }
       return false;
     }
-    if (receiverEligible === 401) {
+    if (receiverEligible === 403) {
       //Daily of goerli recieved
-      const m = config.MESSAGES.ERRORS.REACHED_DAILY_GOERLI_ETH(message.author.id);
+      const m = config.MESSAGES.ERRORS.ADDRESS_IS_NOT_ELIGIBLE;
       if (message) {
         embed.setDescription(m)
             .setTimestamp().setColor(3447003);
@@ -65,9 +65,9 @@ module.exports = {
       return false;
     }
 
-    if (receiverEligible === 403) {
+    if (receiverEligible === 401) {
       //Daily of goerli recieved
-      const m = config.MESSAGES.ERRORS.ADDRESS_IS_NOT_ELIGIBLE;
+      const m = config.MESSAGES.ERRORS.REACHED_DAILY_GOERLI_ETH(message.author.id);
       if (message) {
         embed.setDescription(m)
             .setTimestamp().setColor(3447003);
