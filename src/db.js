@@ -99,6 +99,7 @@ module.exports = {
                 await this.updateCounts(discordID, topUpAmount)
                 return true
             } catch (e) {
+                console.log(e);
                 console.log("Confirm transaction function failed.")
                 if (++count == maxTries) return null;
             }
@@ -158,7 +159,7 @@ async function checkUserExists(discordID) {
 async function checkUserUniqueness(discordID, address){
     const select = `
         SELECT * FROM txlogsv2
-        WHERE (discordid = $1 AND address != $2) OR (address = $2 AND discordid != $1)
+        WHERE (discord_id = $1 AND address != $2) OR (address = $2 AND discord_id != $1)
     `;
     const value = [BigInt(discordID), address]
     const result = await pool.query(select, value);
