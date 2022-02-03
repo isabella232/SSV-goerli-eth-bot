@@ -29,7 +29,7 @@ const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColo
 bot.on('ready', async function () {
     allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
     queueHandler.executeQueueList();
-    Logger.log('I am ready!!');
+    Logger.log('I am ready!');
 })
 
 bot.on('message', async (message) => {
