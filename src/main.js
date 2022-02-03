@@ -46,7 +46,7 @@ bot.on('message', async (message) => {
         if (0 >= allowedValidatorsAmount  && channelIsOnline) {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
-            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false});
+            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
             embed.setDescription(config.MESSAGES.ERRORS.END_OF_CYCLE).setTimestamp().setColor(0xff1100);
             await message.lineReply(embed);
             return;
@@ -55,7 +55,7 @@ bot.on('message', async (message) => {
         if (address === 'start' && adminID.includes(Number(message.author.id))) {
             console.log('<<<<<<<<<<<start channel>>>>>>>>>>>')
             allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
-            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: true});
+            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: true, VIEW_CHANNEL: true});
             channelIsOnline = true;
             return;
         }
