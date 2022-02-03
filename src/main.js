@@ -34,6 +34,7 @@ bot.on('ready', async function () {
 
 bot.on('message', async (message) => {
     try {
+        if(message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
 
         let text = '';
