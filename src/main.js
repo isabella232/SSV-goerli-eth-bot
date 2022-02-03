@@ -119,7 +119,7 @@ async function getAmountOfValidatorsAllowed() {
     const itemsInQueue = (await redisStore.getQueueItems()).length
     const addressBalance = Number(await utils.getAddressBalance(walletSwitcher.getWalletAddress()));
     console.log('Amount of validators able to register: ', (addressBalance / 32 - (itemsInQueue * 32)).toFixed())
-    return (addressBalance / 32 - itemsInQueue).toFixed();
+    return Math.floor(addressBalance / 32 - itemsInQueue);
 }
 
 bot.login(process.env.SSV_DISCORD_BOT_TOKEN);
