@@ -43,7 +43,7 @@ bot.on('message', async (message) => {
         const hexData = args[1];
         let channel = message.channel;
 
-        if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
+        if (0 > allowedValidatorsAmount - 1  && channelIsOnline && false) {
             await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES']}]);
             return;
         }
