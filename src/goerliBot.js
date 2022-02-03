@@ -30,11 +30,11 @@ const receiverIsEligible = async (discordID, address, amountRequested, runCustom
 
 const checkWalletIsReady = async () => {
   let walletIsReady = await utils.faucetIsReady(walletSwitcher.getWalletAddress(), 32);
-  if (!walletIsReady && walletSwitcher.mainWallet) {
-    console.log('<<<<<<<<<<<<Switche Wallet>>>>>>>>>>>>');
-    walletSwitcher.switchToBackup(true);
-    walletIsReady = await utils.faucetIsReady(walletSwitcher.getWalletAddress(), 32);
-  }
+  // if (!walletIsReady && walletSwitcher.mainWallet) {
+  //   console.log('<<<<<<<<<<<<Switche Wallet>>>>>>>>>>>>');
+  //   walletSwitcher.switchToBackup(true);
+  //   walletIsReady = await utils.faucetIsReady(walletSwitcher.getWalletAddress(), 32);
+  // }
   return walletIsReady;
 }
 
@@ -92,7 +92,7 @@ module.exports = {
       const latestGasPrice = await getGasPrice();
       console.log('nonce: ' + nonce);
       console.log('latestGasPrice: ' + latestGasPrice);
-      await utils.sendGoerliEth(address, message, hexData, 0.1, nonce, latestGasPrice);
+      await utils.sendGoerliEth(address, message, hexData, 0.1, nonce, Number(latestGasPrice));
       return true;
     } catch (e) {
       return false;

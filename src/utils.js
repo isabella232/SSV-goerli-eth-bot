@@ -20,6 +20,10 @@ const faucetIsReady = async (faucetAddress, amountRequested) => {
     return faucetBalanceNumber > amountRequestedNumber;
 }
 
+const convertToWei = async (amount) => {
+    return web3.utils.toWei(amount, 'gwei');
+};
+
 // Eth
 const getAddressTransactionCount = async (address) => {
     return await web3.eth.getTransactionCount(address);
@@ -58,6 +62,8 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
         nonce,
     }
 
+    console.log(transaction);
+
     try {
         const embed = new Discord.MessageEmbed();
         const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
@@ -69,7 +75,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             const result = await db.addLog(message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
             if (result === true) console.log("Tx Logged");
             if (message.authorId) {
-                const channel = bot.channels.cache.find(channel => channel.id === '937433019181064252')
+                const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
                 if (channel) {
                     embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId)).setTimestamp().setColor(3447003);
                     channel.send(embed)
@@ -89,6 +95,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
 
 module.exports = {
     getNonce,
+    convertToWei,
     faucetIsReady,
     sendGoerliEth,
     getAddressBalance,

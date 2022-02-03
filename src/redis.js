@@ -6,7 +6,8 @@ class Redis {
             url: process.env.SSV_REDIS_URI
         });
         this.client.connect();
-        // this.client.del('queue_next_index')
+        this.client.del('queue_next_index')
+        this.removeAllItems();
     }
 
     getNextIndex = async () => {
@@ -25,6 +26,17 @@ class Redis {
         const nextIndex = await this.getNextIndex();
         await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData}))
         await this.setNextIndex(nextIndex);
+    };
+
+    removeAllItems = async () => {
+        const itemsKeys = await this.getQueueItems();
+        for (let key in itemsKeys) {
+            await this.removeFromQueue(itemsKeys[key]);
+        }
+    };
+
+    getQueueItems = async () => {
+        return await this.client.keys('queue_item_*')
     };
 
     removeFromQueue = async (key) => {
