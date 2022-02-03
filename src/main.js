@@ -18,7 +18,7 @@ let channelIsOnline = true;
 const textColor = 0xff1100;
 const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
-const adminID = [844110609142513675,  724238721028980756, 876421771400740874];
+const adminID = [844110609142513675, 724238721028980756, 876421771400740874];
 
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(3447003)
     .setDescription(config.MESSAGES.MODE.HELP)
@@ -43,7 +43,7 @@ bot.on('message', async (message) => {
         const hexData = args[1];
         let channel = message.channel;
 
-        if (0 >= allowedValidatorsAmount  && channelIsOnline) {
+        if (address !== 'start' && 0 >= allowedValidatorsAmount  && channelIsOnline) {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
             await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
