@@ -18,7 +18,7 @@ let channelIsOnline = true;
 const textColor = 0xff1100;
 const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
-const adminID = [844110609142513675, 836513795194355765, 724238721028980756, 876421771400740874];
+const adminID = [844110609142513675, 724238721028980756, 876421771400740874];
 
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(3447003)
     .setDescription(config.MESSAGES.MODE.HELP)
