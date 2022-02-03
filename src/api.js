@@ -61,11 +61,9 @@ module.exports = {
                 return 990000000000
             }
 
-            let gas = await utils.convertToWei(lastGasPrice);
-            return gas
+            return await utils.convertToWei(lastGasPrice);
         }
         catch (e) {
-            console.log(e);
             return 990000000000
         }
     }

@@ -77,7 +77,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
                 if (channel) {
-                    embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId)).setTimestamp().setColor(3447003);
+                    embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash)).setTimestamp().setColor(3447003);
                     channel.send(embed)
                 }
             } else console.error('Tx log failed');

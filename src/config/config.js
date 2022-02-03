@@ -1,5 +1,5 @@
 const config = {
-    CHANNEL_ID: '938354869507608587',
+    CHANNEL_ID: process.env.SSV_DISCORD_BOT_CHANNEL,
     VERIFIED_ROLE_ID: '938466857659293786',
     MESSAGES: {
         MODE: {
@@ -20,7 +20,7 @@ const config = {
         },
         SUCCESS: {
             PROCESSING_TRANSACTION: (authorId) => {return `\n<@!${authorId}>** Processing Transaction**`},
-            OPERATION_SUCCESSFUL: (authorId) => {return `**Operation Successful**\nSent **32 goerli ETH** to \n<@!${authorId}>`},
+            OPERATION_SUCCESSFUL: (authorId, txHash) => {return `**Operation Successful**\nSent **32 goerli ETH** to \n<@!${authorId}> please wait a few minutes for it to arrive. To check the details at etherscan.io, click https://goerli.etherscan.io/tx/${txHash}`},
         },
     },
 };
