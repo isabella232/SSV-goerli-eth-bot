@@ -45,14 +45,15 @@ bot.on('message', async (message) => {
 
         if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
             await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES']}]);
-            channelIsOnline = true;
             return;
         }
 
         if (address === 'start' && adminID.includes(Number(message.author.id))) {
+            channelIsOnline = false;
+            console.log('Start Bot Again')
             allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
             await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, allow: ['SEND_MESSAGES']}]);
-            channelIsOnline = false;
+            channelIsOnline = true;
             return;
         }
 

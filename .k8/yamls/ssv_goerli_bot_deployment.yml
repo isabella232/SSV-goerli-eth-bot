@@ -38,6 +38,12 @@ spec:
               name: config-secrets
               key: ssv_discord_bot_token
 
+        - name: SSV_DISCORD_BOT_CHANNEL
+          valueFrom:
+            secretKeyRef:
+               name: config-secrets
+               key: ssv_discord_bot_channel
+
         - name: SSV_FAUCET_ADDRESS
           valueFrom:
             secretKeyRef:
