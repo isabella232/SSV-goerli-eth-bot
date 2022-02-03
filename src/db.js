@@ -21,7 +21,7 @@ pool.query('SELECT NOW()', (err, res) => {
 });
 
 
-const createTable = `create table if not exists depositortest(
+const createTable = `create table if not exists depositortestv2(
     discordid         bigint not null constraint depositortest_pk primary key,
     address           varchar,
     dailycount        real,
@@ -30,15 +30,15 @@ const createTable = `create table if not exists depositortest(
     weeklytime        timestamp
 )`
 
-const createLogTable = `create table if not exists txlogs(
+const createLogTable = `create table if not exists txlogsv2(
     discord_id bigint,
+    address varchar,
     discord_name varchar,
     pub_key    varchar,
     etherscan_link varchar,
     deposit_abi varchar,
     created_at timestamp
-)
-`
+)`
 
 pool.query(createTable, (err, res) => {
     if(err){
@@ -72,11 +72,15 @@ module.exports = {
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
 
+                const isUniq = await checkUserUniqueness(discordID, address);
+                if(isUniq.length > 0) return 403;
+
                 if (!userDetails.length) {
                     const userDetails = await setDepositor(discordID, address);
                     await this.updateCounts(userDetails.discordid, topUpAmount);
                     return true
                 }
+
                 userDetails = userDetails[0];
                 if (userDetails.address !== address) {
                     await updateAddress(discordID, address)
@@ -114,18 +118,18 @@ module.exports = {
             if (userDetails.weeklycount > 0) newWeeklyCount = Number(userDetails.weeklycount + topUpAmount);
         }
         
-        const update = 'update depositortest set dailycount= $1,weeklycount= $2 where discordid= $3';
+        const update = 'update depositortestv2 set dailycount= $1,weeklycount= $2 where discordid= $3';
         const values = [newDailyCount,newWeeklyCount, BigInt(discordID)];
         await pool.query(update,values);
     },
-    addLog: async function(discord_id, discord_name,pubKey, etherscan_link, deposit_abi){
+    addLog: async function(address, discord_id, discord_name, pubKey, etherscan_link, deposit_abi){
         var count = 0;
         while (true) {
             try {
                 const now = new Date();
-                const insert =   `INSERT INTO txlogs
-                                (discord_id,discord_name,pub_key,etherscan_link,deposit_abi,created_at) VALUES ($1,$2,$3,$4,$5,$6);`
-                const values = [discord_id,discord_name,pubKey,etherscan_link,deposit_abi,now];
+                const insert =   `INSERT INTO txlogsv2
+                                (discord_id,discord_name,pub_key,etherscan_link,deposit_abi,created_at,address) VALUES ($1,$2,$3,$4,$5,$6,$7);`
+                const values = [discord_id,discord_name,pubKey,etherscan_link,deposit_abi,now,address];
                 await pool.query(insert,values);
                 return true
             } catch (e) {
@@ -136,14 +140,14 @@ module.exports = {
 }
 
 async function updateAddress(discordID, address){
-    const query = `update depositortest set address=$1 where discordid=$2`
+    const query = `update depositortestv2 set address=$1 where discordid=$2`
     const vals = [String(address), BigInt(discordID)]
     await pool.query(query, vals);
 }
 
-async function checkUserExists(discordID){
+async function checkUserExists(discordID) {
     const select = `
-        SELECT * FROM depositortest
+        SELECT * FROM depositortestv2
         WHERE discordid = $1
     `;
     const value = [BigInt(discordID)]
@@ -151,10 +155,20 @@ async function checkUserExists(discordID){
     return result.rows;
 }
 
-async function setDepositor(discordID, address){
+async function checkUserUniqueness(discordID, address){
+    const select = `
+        SELECT * FROM txlogsv2
+        WHERE (discordid = $1 AND address != $2) OR (address = $2 AND discordid != $1)
+    `;
+    const value = [BigInt(discordID), address]
+    const result = await pool.query(select, value);
+    return result.rows;
+}
+
+async function setDepositor(discordID, address) {
     const now = new Date();
     const insert = `
-        INSERT INTO depositortest
+        INSERT INTO depositortestv2
             (discordid,address,dailyCount,weeklyCount,dailyTime,weeklyTime) 
             VALUES ($1,$2,$3,$4,$5,$6);
         `
@@ -184,7 +198,7 @@ async function resetDailyCount(userDetails){
     if ((Math.floor(now.getTime()/1000 - Math.floor(dailytime.getTime()/1000))) > 86400){
         //update
         console.log('Resetting Daily...');
-        const update = 'update depositortest set dailycount=0,dailytime=$1 where discordid= $2 returning dailycount'
+        const update = 'update depositortestv2 set dailycount=0,dailytime=$1 where discordid= $2 returning dailycount'
         const values = [now, discordID]
         const dailycount = await pool.query(update,values);
         return dailycount.rows[0].dailycount; //daily limit has been reset
@@ -205,7 +219,7 @@ async function resetWeeklyCount(userDetails){
     if ((Math.floor(now.getTime()/1000 - Math.floor(weeklytime.getTime()/1000))) > 604800){
         //update
         console.log('Resetting Weekly...');
-        const update = 'update depositortest set weeklycount=0,weeklytime=$1 where discordid= $2 returning weeklycount'
+        const update = 'update depositortestv2 set weeklycount=0,weeklytime=$1 where discordid= $2 returning weeklycount'
         const values = [now,discordID]
         const weeklycount = await pool.query(update,values);
         return weeklycount.rows[0].weeklycount; //weekly limit has been reset

@@ -11,6 +11,7 @@ const config = {
             INVALID_ADDRESS: '**Error**\nInvalid `Address`.',
             UNKNOWN_ERROR: '**Error**\nUnknown error occurred.',
             NO_ADDRESS: '**Error**\nNo arguments provided. Please check the guide.',
+            ADDRESS_IS_NOT_ELIGIBLE: '**Error**\nWallet address is not eligible for Deposit.',
             INVALID_NUMBER_OF_ARGUMENTS_HEX: '**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.',
             SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE: '**Error**\nSomething went wrong while confirming your transaction please try again.',
             FAUCET_DONT_HAVE_ETH: '"**Operation Unsuccessful**\nThe Bot does not have enough Goerli ETH.  Please contact the maintainers."',

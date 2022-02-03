@@ -70,7 +70,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
         try {
             const decodedHexData = abiDecoder.decodeMethod(methodAbi);
             const pubKey = decodedHexData.params[0].value;
-            const result = await db.addLog(message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
+            const result = await db.addLog(address, message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
             if (result === true) console.log("Tx Logged");
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
