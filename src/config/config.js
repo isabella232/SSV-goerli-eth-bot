@@ -10,6 +10,7 @@ const config = {
             INVALID_HEX: '**Error**\nInvalid `Hex`.',
             INVALID_ADDRESS: '**Error**\nInvalid `Address`.',
             UNKNOWN_ERROR: '**Error**\nUnknown error occurred.',
+            WRONG_HEX: (authorId) => { return '**Error**\n<@!${authorId}> Transaction failed, please try again.'},
             NO_ADDRESS: '**Error**\nNo arguments provided. Please check the guide.',
             ADDRESS_IS_NOT_ELIGIBLE: '**Error**\nWallet address is not eligible for Deposit.',
             INVALID_NUMBER_OF_ARGUMENTS_HEX: '**Error**\nInvalid number of arguments. Please provide your `hex` **after** the `address`.',
