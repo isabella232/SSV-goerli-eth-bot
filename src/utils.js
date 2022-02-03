@@ -62,8 +62,6 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
         nonce,
     }
 
-    console.log(transaction);
-
     try {
         const embed = new Discord.MessageEmbed();
         const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
