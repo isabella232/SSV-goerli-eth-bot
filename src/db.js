@@ -22,7 +22,7 @@ pool.query('SELECT NOW()', (err, res) => {
 
 
 const createTable = `create table if not exists depositortestv2(
-    discordid         bigint not null constraint depositortest_pk primary key,
+    discordid         bigint not null constraint depositortestv2_pk primary key,
     address           varchar,
     dailycount        real,
     weeklycount       real,
