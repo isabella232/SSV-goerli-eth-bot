@@ -48,7 +48,7 @@ module.exports = {
     const receiverEligible = await receiverIsEligible(message.author.id, address, 32, runCustomChecks);
     if (receiverEligible === null) {
       if (message) {
-        embed.setDescription(Config.MESSAGES.ERRORS.SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE)
+        embed.setDescription(config.MESSAGES.ERRORS.SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE)
             .setTimestamp().setColor(3447003);
         await message.lineReply(embed);
       }
@@ -57,7 +57,17 @@ module.exports = {
     if (receiverEligible === 401) {
       //Daily of goerli recieved
       const m = config.MESSAGES.ERRORS.REACHED_DAILY_GOERLI_ETH(message.author.id);
-      console.log(m);
+      if (message) {
+        embed.setDescription(m)
+            .setTimestamp().setColor(3447003);
+        await message.lineReply(embed);
+      }
+      return false;
+    }
+
+    if (receiverEligible === 403) {
+      //Daily of goerli recieved
+      const m = config.MESSAGES.ERRORS.ADDRESS_IS_NOT_ELIGIBLE;
       if (message) {
         embed.setDescription(m)
             .setTimestamp().setColor(3447003);
@@ -69,8 +79,6 @@ module.exports = {
     if (receiverEligible === 402) {
       //Weekly quota of goerli reached
       const m = `**Operation Unsuccessful**\n<@!${message.author.id}> has reached their weekly quota of goerliETH.`;
-
-      console.log(m);
 
       if (message) {
         embed.setDescription(m)

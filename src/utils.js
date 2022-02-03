@@ -70,7 +70,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
         try {
             const decodedHexData = abiDecoder.decodeMethod(methodAbi);
             const pubKey = decodedHexData.params[0].value;
-            const result = await db.addLog(message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
+            const result = await db.addLog(address, message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
             if (result === true) console.log("Tx Logged");
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
@@ -80,8 +80,12 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
                 }
             } else console.error('Tx log failed');
         } catch (e) {
-            console.log(e);
             console.log("Counld not log transaction.");
+            const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
+            if (channel) {
+                embed.setDescription(config.MESSAGES.ERRORS.WRONG_HEX(message.authorId)).setTimestamp().setColor(3447003);
+                channel.send(embed)
+            }
         }
     } catch (err) {
         console.log('<<<<<<<<<<<<<<<<<<<<<<<<<calculate new nonce>>>>>>>>>>>>>>>>>>>>>>>>>');

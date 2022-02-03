@@ -18,7 +18,7 @@ let channelIsOnline = true;
 const textColor = 0xff1100;
 const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
-const adminID = [844110609142513675, 836513795194355765, 724238721028980756, 876421771400740874];
+const adminID = [844110609142513675, 724238721028980756, 876421771400740874];
 
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(3447003)
     .setDescription(config.MESSAGES.MODE.HELP)
@@ -34,6 +34,7 @@ bot.on('ready', async function () {
 
 bot.on('message', async (message) => {
     try {
+        if(message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
 
         let text = '';
@@ -43,16 +44,19 @@ bot.on('message', async (message) => {
         const hexData = args[1];
         let channel = message.channel;
 
-        if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
-            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES']}]);
+        if (address !== 'start' && 0 >= allowedValidatorsAmount  && channelIsOnline) {
+            console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
+            channelIsOnline = false;
+            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
+            embed.setDescription(config.MESSAGES.ERRORS.END_OF_CYCLE).setTimestamp().setColor(0xff1100);
+            await message.lineReply(embed);
             return;
         }
 
         if (address === 'start' && adminID.includes(Number(message.author.id))) {
-            channelIsOnline = false;
-            console.log('Start Bot Again')
+            console.log('<<<<<<<<<<<start channel>>>>>>>>>>>')
             allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
-            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, allow: ['SEND_MESSAGES']}]);
+            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: true, VIEW_CHANNEL: true});
             channelIsOnline = true;
             return;
         }
@@ -93,6 +97,7 @@ bot.on('message', async (message) => {
                     authorId: message.author.id,
                     username: message.author.username
                 }, address, hexData);
+                allowedValidatorsAmount -= 1;
             } else if (!isAddress) {
                 text = config.MESSAGES.ERRORS.INVALID_ADDRESS;
             } else if (!isHex) {
@@ -118,8 +123,8 @@ bot.on('message', async (message) => {
 async function getAmountOfValidatorsAllowed() {
     const itemsInQueue = (await redisStore.getQueueItems()).length
     const addressBalance = Number(await utils.getAddressBalance(walletSwitcher.getWalletAddress()));
-    console.log('Amount of validators able to register: ', (addressBalance / 32 - (itemsInQueue * 32)).toFixed())
-    return (addressBalance / 32 - itemsInQueue).toFixed();
+    console.log('Amount of validators able to register: ', Math.floor(addressBalance / 32 - (itemsInQueue * 32)));
+    return Math.floor(addressBalance / 32 - itemsInQueue);
 }
 
 bot.login(process.env.SSV_DISCORD_BOT_TOKEN);
