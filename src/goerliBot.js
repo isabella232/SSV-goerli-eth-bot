@@ -48,7 +48,7 @@ module.exports = {
     const receiverEligible = await receiverIsEligible(message.author.id, address, 32, runCustomChecks);
     if (receiverEligible === null) {
       if (message) {
-        embed.setDescription(Config.MESSAGES.ERRORS.SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE)
+        embed.setDescription(config.MESSAGES.ERRORS.SOMETHING_WENT_WRONG_RECEIVER_ELIGIBLE)
             .setTimestamp().setColor(3447003);
         await message.lineReply(embed);
       }
