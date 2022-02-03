@@ -43,7 +43,7 @@ bot.on('message', async (message) => {
         const hexData = args[1];
         let channel = message.channel;
 
-        if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
+        if (0 >= allowedValidatorsAmount  && channelIsOnline) {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
             await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false});
@@ -96,6 +96,7 @@ bot.on('message', async (message) => {
                     authorId: message.author.id,
                     username: message.author.username
                 }, address, hexData);
+                allowedValidatorsAmount -= 1;
             } else if (!isAddress) {
                 text = config.MESSAGES.ERRORS.INVALID_ADDRESS;
             } else if (!isHex) {
