@@ -53,7 +53,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
 
     const transaction = {
         from: walletSwitcher.getWalletAddress(),
-        to: '0x45E668aba4b7fc8761331EC3CE77584B7A99A51A' || process.env.SSV_CONTRACT_ADDRESS,
+        to: process.env.SSV_CONTRACT_ADDRESS,
         gas: 1000000,
         value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
         data: methodAbi,
@@ -75,7 +75,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
                 if (channel) {
-                    embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash)).setTimestamp().setColor(3447003);
+                    embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash)).setTimestamp().setColor(config.COLORS.BLUE);
                     channel.send(embed)
                 }
             } else console.error('Tx log failed');

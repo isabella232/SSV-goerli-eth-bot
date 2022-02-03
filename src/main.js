@@ -15,12 +15,11 @@ const walletSwitcher = require("./initializers/WalletSwitcher");
 let allowedValidatorsAmount;
 let channelIsOnline = true;
 
-const textColor = 0xff1100;
 const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
 const adminID = [844110609142513675, 724238721028980756, 876421771400740874];
 
-const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(3447003)
+const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(config.COLORS.BLUE)
     .setDescription(config.MESSAGES.MODE.HELP)
     .addField("+goerlieth <address> <hex-data>", 'To start you need to register the **wallet address** you used to generate the **hex** and the **hex** itself.')
     .addField("+goerlieth help", 'Help with the bot.')
@@ -43,12 +42,12 @@ bot.on('message', async (message) => {
         const address = args[0];
         const hexData = args[1];
         let channel = message.channel;
-
+        let textColor = config.COLORS.BLUE;
         if (address !== 'start' && 0 >= allowedValidatorsAmount  && channelIsOnline) {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
             await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
-            embed.setDescription(config.MESSAGES.ERRORS.END_OF_CYCLE).setTimestamp().setColor(0xff1100);
+            embed.setDescription(config.MESSAGES.ERRORS.END_OF_CYCLE).setTimestamp().setColor(config.COLORS.BLUE);
             await message.lineReply(embed);
             return;
         }
@@ -70,9 +69,18 @@ bot.on('message', async (message) => {
 
         // check user's params
         if (address === 'mod') text = config.MESSAGES.MODE.MOD;
-        if (!address) text = config.MESSAGES.ERRORS.NO_ADDRESS;
-        if (!hexData && address && web3.utils.isAddress(address)) text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_HEX;
-        if (!hexData && address && web3.utils.isHex(address)) text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS;
+        if (!address) {
+            textColor = config.COLORS.RED;
+            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS;
+        }
+        if (!hexData && address && web3.utils.isAddress(address)) {
+            textColor = config.COLORS.RED;
+            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_HEX;
+        }
+        if (!hexData && address && web3.utils.isHex(address)){
+            textColor = config.COLORS.RED;
+            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS;
+        }
 
         if (address && hexData) {
             const isHex = web3.utils.isHexStrict(hexData);
@@ -93,6 +101,7 @@ bot.on('message', async (message) => {
                 const userEligible = await goerliBot.checkUserEligibility(message, address, withCustomChecks);
                 if (!userEligible) return;
                 text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
+                textColor = config.COLORS.BLUE;
                 await redisStore.addToQueue({
                     authorId: message.author.id,
                     username: message.author.username

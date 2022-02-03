@@ -59,7 +59,7 @@ module.exports = {
       const m = config.MESSAGES.ERRORS.ADDRESS_IS_NOT_ELIGIBLE;
       if (message) {
         embed.setDescription(m)
-            .setTimestamp().setColor(3447003);
+            .setTimestamp().setColor(config.COLORS.RED);
         await message.lineReply(embed);
       }
       return false;
@@ -70,7 +70,7 @@ module.exports = {
       const m = config.MESSAGES.ERRORS.REACHED_DAILY_GOERLI_ETH(message.author.id);
       if (message) {
         embed.setDescription(m)
-            .setTimestamp().setColor(3447003);
+            .setTimestamp().setColor(config.COLORS.RED);
         await message.lineReply(embed);
       }
       return false;
