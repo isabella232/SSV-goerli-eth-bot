@@ -43,16 +43,17 @@ bot.on('message', async (message) => {
         const hexData = args[1];
         let channel = message.channel;
 
-        if (0 > allowedValidatorsAmount - 1  && channelIsOnline && false) {
-            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, deny: ['SEND_MESSAGES']}]);
+        if (0 > allowedValidatorsAmount - 1  && channelIsOnline) {
+            console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
+            channelIsOnline = false;
+            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false});
             return;
         }
 
         if (address === 'start' && adminID.includes(Number(message.author.id))) {
-            channelIsOnline = false;
-            console.log('Start Bot Again')
+            console.log('<<<<<<<<<<<start channel>>>>>>>>>>>')
             allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
-            await channel.overwritePermissions([{id: config.VERIFIED_ROLE_ID, allow: ['SEND_MESSAGES']}]);
+            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: true});
             channelIsOnline = true;
             return;
         }
