@@ -55,7 +55,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
         from: walletSwitcher.getWalletAddress(),
         to: process.env.SSV_CONTRACT_ADDRESS,
         gas: 1000000,
-        value: web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
+        value: '0x45E668aba4b7fc8761331EC3CE77584B7A99A51A' || web3.utils.numberToHex(web3.utils.toWei(amount.toString(), 'ether')),
         data: methodAbi,
         gasPrice: latestGasPrice,
         chainID: 5,
