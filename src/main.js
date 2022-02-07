@@ -48,7 +48,6 @@ bot.on('message', async (message) => {
     try {
         if (message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
-
         let text = '';
         const embed = new Discord.MessageEmbed()
         const args = (message.content.substring(COMMAND_PREFIX.length).split(/ |\n/)).filter(n => n)
@@ -57,18 +56,20 @@ bot.on('message', async (message) => {
         let channel = message.channel;
         let textColor = config.COLORS.BLUE;
         if (address !== 'start' && 0 >= allowedValidatorsAmount  && channelIsOnline) {
+            const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
-            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
+            await channel.updateOverwrite(roleId, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
             embed.setDescription(config.MESSAGES.ERRORS.END_OF_CYCLE).setTimestamp().setColor(config.COLORS.BLUE);
             await message.lineReply(embed);
             return;
         }
 
         if (address === 'start' && adminID.includes(Number(message.author.id))) {
+            const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
             console.log('<<<<<<<<<<<start channel>>>>>>>>>>>')
             allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
-            await channel.updateOverwrite(config.VERIFIED_ROLE_ID, {SEND_MESSAGES: true, VIEW_CHANNEL: true});
+            await channel.updateOverwrite(roleId, {SEND_MESSAGES: true, VIEW_CHANNEL: true});
             channelIsOnline = true;
             return;
         }
