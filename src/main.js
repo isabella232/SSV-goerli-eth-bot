@@ -38,6 +38,10 @@ bot.on('message', async (message) => {
         const args = (message.content.split(/ |\n/)).filter(n => n);
         const uniqId = args[0]
         const status = args[1]
+        if(uniqId === 'clean') {
+            await redisStore.removeAllItems();
+            return;
+        }
         if (!uniqId || (status !== 'true' && status !== 'false')) return;
         await redisStore.changeFormSubmitted(uniqId, status === 'true');
     }
