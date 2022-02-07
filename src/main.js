@@ -116,11 +116,11 @@ bot.on('message', async (message) => {
                 text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
                 textColor = config.COLORS.BLUE;
                 const userUniqId = crypto.randomBytes(20).toString('hex');
+                await message.author.send(config.FORM_URL + `?uniqueID=${userUniqId}`);
                 await redisStore.addToQueue({
                     authorId: message.author.id,
                     username: message.author.username,
                 }, address, hexData, userUniqId);
-                await message.author.send(config.FORM_URL + `?uniqueID=${userUniqId}`);
                 allowedValidatorsAmount -= 1;
             } else if (!isAddress) {
                 text = config.MESSAGES.ERRORS.INVALID_ADDRESS;
