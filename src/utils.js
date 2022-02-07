@@ -78,7 +78,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
                     embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash)).setTimestamp().setColor(config.COLORS.BLUE);
                     channel.send(embed)
                 }
-            } else console.error('Tx log failed');
+            } else console.error('<<<<<Tx log failed>>>>>');
         } catch (e) {
             console.log("Counld not log transaction.");
             const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
