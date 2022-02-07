@@ -20,10 +20,13 @@ class QueueHandler {
         for (let key in itemsKeys) {
             console.log('Running ' + (Number(key) + 1) + '/' + itemsKeys.length);
             const item = JSON.parse(await this.redisStore.client.get(itemsKeys[key]));
-            const pass = await goerliBot.runGoerliFaucet(item.message, item.address, item.hexData);
-            if (pass) await this.redisStore.removeFromQueue(itemsKeys[key]);
-            console.log('Delete ' + itemsKeys[key] + ' from redis');
+            if(item.formSubmitted) {
+                await goerliBot.runGoerliFaucet(item.message, item.address, item.hexData);
+                await this.redisStore.removeFromQueue(itemsKeys[key]);
+                console.log('Delete ' + itemsKeys[key] + ' from redis');
+            }
         }
+
         await this.sleep(3000);
         await this.executeQueueList();
     };

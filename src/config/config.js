@@ -1,6 +1,8 @@
 const config = {
-    CHANNEL_ID: process.env.SSV_DISCORD_BOT_CHANNEL,
     VERIFIED_ROLE_ID: '936274576801923163',
+    FORM_URL: process.env.SSV_FORM_URL,
+    CHANNEL_ID: process.env.SSV_DISCORD_BOT_CHANNEL,
+    SHEET_REPLY_CHANNEL: process.env.SSV_SHEET_REPLY_CHANNEL,
     COLORS: {
         BLUE: 3447003,
         RED: 0xff1100,

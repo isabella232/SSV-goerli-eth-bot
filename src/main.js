@@ -2,6 +2,7 @@ require('discord-reply');
 require('dotenv').config();
 require('./db');
 const web3 = require('web3');
+const crypto = require('crypto');
 const utils = require('./utils');
 const redisStore = require('./redis');
 const Logger = require('./logger.js');
@@ -12,12 +13,13 @@ const bot = require('./initializers/DiscordBot');
 const queueHandler = require('./queueHandler.js');
 const walletSwitcher = require("./initializers/WalletSwitcher");
 
+
 let allowedValidatorsAmount;
 let channelIsOnline = true;
 
 const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
-const adminID = [844110609142513675, 724238721028980756, 876421771400740874];
+const adminID = [844110609142513675, 724238721028980756, 876421771400740874, 836513795194355765];
 
 const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(config.COLORS.BLUE)
     .setDescription(config.MESSAGES.MODE.HELP)
@@ -32,6 +34,9 @@ bot.on('ready', async function () {
 })
 
 bot.on('message', async (message) => {
+    if(message.channel.id === config.SHEET_REPLY_CHANNEL) {
+        await redisStore.changeFormSubmitted(message.content);
+    }
     try {
         if(message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
@@ -102,10 +107,12 @@ bot.on('message', async (message) => {
                 if (!userEligible) return;
                 text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
                 textColor = config.COLORS.BLUE;
+                const userUniqId = crypto.randomBytes(20).toString('hex');
                 await redisStore.addToQueue({
                     authorId: message.author.id,
-                    username: message.author.username
-                }, address, hexData);
+                    username: message.author.username,
+                }, address, hexData, userUniqId);
+                await message.author.send(config.FORM_URL + `?uniqueID=${userUniqId}`);
                 allowedValidatorsAmount -= 1;
             } else if (!isAddress) {
                 text = config.MESSAGES.ERRORS.INVALID_ADDRESS;

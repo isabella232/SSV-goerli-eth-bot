@@ -1,4 +1,5 @@
 const redis = require('redis');
+const goerliBot = require("./goerliBot");
 
 class Redis {
     constructor() {
@@ -22,11 +23,22 @@ class Redis {
        await this.client.set('queue_next_index', index);
     };
 
-    addToQueue = async (message, address, hexData) => {
+    addToQueue = async (message, address, hexData, uniqId) => {
         const nextIndex = await this.getNextIndex();
-        await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData}))
+        await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData, uniqId, formSubmitted: false}))
         await this.setNextIndex(nextIndex);
     };
+
+    changeFormSubmitted = async (uniqId) => {
+        const items = await this.getQueueItems();
+        for (let key in items) {
+            const item = JSON.parse(await this.client.get(items[key]));
+            if(item.uniqId === uniqId) {
+                item.formSubmitted = true;
+                await this.client.set(items[key], JSON.stringify(item));
+            }
+        }
+    }
 
     removeAllItems = async () => {
         const itemsKeys = await this.getQueueItems();
