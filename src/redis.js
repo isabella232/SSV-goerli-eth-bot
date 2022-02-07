@@ -29,13 +29,17 @@ class Redis {
         await this.setNextIndex(nextIndex);
     };
 
-    changeFormSubmitted = async (uniqId) => {
+    changeFormSubmitted = async (uniqId, status) => {
         const items = await this.getQueueItems();
         for (let key in items) {
             const item = JSON.parse(await this.client.get(items[key]));
-            if(item.uniqId === uniqId) {
-                item.formSubmitted = true;
-                await this.client.set(items[key], JSON.stringify(item));
+            if (item.uniqId === uniqId) {
+                if (status) {
+                    item.formSubmitted = true;
+                    await this.client.set(items[key], JSON.stringify(item));
+                } else {
+                    await this.client.del(items[key]);
+                }
             }
         }
     }

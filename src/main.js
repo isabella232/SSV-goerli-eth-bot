@@ -34,11 +34,15 @@ bot.on('ready', async function () {
 })
 
 bot.on('message', async (message) => {
-    if(message.channel.id === config.SHEET_REPLY_CHANNEL) {
-        await redisStore.changeFormSubmitted(message.content);
+    if (message.channel.id === config.SHEET_REPLY_CHANNEL) {
+        const args = (message.content.split(/ |\n/)).filter(n => n);
+        const uniqId = args[0]
+        const status = args[1]
+        if (!uniqId || !status) return;
+        await redisStore.changeFormSubmitted(message.content, status === 'true');
     }
     try {
-        if(message.channel.id !== config.CHANNEL_ID) return
+        if (message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
 
         let text = '';
