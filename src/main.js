@@ -38,8 +38,8 @@ bot.on('message', async (message) => {
         const args = (message.content.split(/ |\n/)).filter(n => n);
         const uniqId = args[0]
         const status = args[1]
-        if (!uniqId || !status) return;
-        await redisStore.changeFormSubmitted(message.content, status === 'true');
+        if (!uniqId || (status !== 'true' && status !== 'false')) return;
+        await redisStore.changeFormSubmitted(uniqId, status === 'true');
     }
     try {
         if (message.channel.id !== config.CHANNEL_ID) return

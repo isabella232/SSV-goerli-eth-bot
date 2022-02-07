@@ -38,6 +38,7 @@ class Redis {
                     item.formSubmitted = true;
                     await this.client.set(items[key], JSON.stringify(item));
                 } else {
+                    console.log(`item deleted key: ${items[key]} value: ${item.message.username} `)
                     await this.client.del(items[key]);
                 }
             }
