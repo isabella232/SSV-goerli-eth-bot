@@ -11,6 +11,7 @@ const config = require('./config/config');
 const goerliBot = require('./goerliBot.js');
 const bot = require('./initializers/DiscordBot');
 const queueHandler = require('./queueHandler.js');
+const DirectMessage = require('./initializers/DirectMessage');
 const walletSwitcher = require("./initializers/WalletSwitcher");
 
 
@@ -29,8 +30,8 @@ const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColo
 
 bot.on('ready', async function () {
     allowedValidatorsAmount = await getAmountOfValidatorsAllowed();
-    queueHandler.executeQueueList();
     Logger.log('I am ready!');
+    queueHandler.executeQueueList();
 })
 
 bot.on('message', async (message) => {
@@ -117,8 +118,9 @@ bot.on('message', async (message) => {
                 text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
                 textColor = config.COLORS.BLUE;
                 const userUniqId = crypto.randomBytes(20).toString('hex');
-                await message.author.send(config.FORM_URL + `?uniqueID=${userUniqId}`);
+                await DirectMessage.addToQueue(message, userUniqId);
                 await redisStore.addToQueue({
+                    message: message,
                     authorId: message.author.id,
                     username: message.author.username,
                 }, address, hexData, userUniqId);

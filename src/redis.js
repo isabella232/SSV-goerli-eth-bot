@@ -1,5 +1,4 @@
 const redis = require('redis');
-const goerliBot = require("./goerliBot");
 
 class Redis {
     constructor() {
