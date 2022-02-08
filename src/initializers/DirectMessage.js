@@ -23,7 +23,7 @@ class DirectMessage {
             const user = await discordBot.users.fetch(item.authorID, false)
             await user.send(config.FORM_URL + `?uniqueID=${uniqId}`);
             await redisStore.removeFromQueue(`direct_message_item_${uniqId}`)
-            await this.sleep(1000);
+            await this.sleep(10000);
         }
         this.sendRequests();
     };
