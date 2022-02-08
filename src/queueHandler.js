@@ -23,7 +23,7 @@ class QueueHandler {
         })
 
         for (let key in itemsKeys) {
-            console.log('Running ' + (Number(key) + 1) + '/' + itemsKeys.length);
+            console.log(`Running ' + ${(Number(key) + 1)} + '/' + ${itemsKeys.length} `,item.address);
             const item = JSON.parse(await this.redisStore.client.get(itemsKeys[key]));
             if(item.formSubmitted) {
                 await goerliBot.runGoerliFaucet(item.message, item.address, item.hexData);
