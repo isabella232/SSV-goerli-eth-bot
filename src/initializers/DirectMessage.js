@@ -21,7 +21,11 @@ class DirectMessage {
             const uniqId = i.split("direct_message_item_").pop();
             const item = JSON.parse(await redisStore.client.get(i));
             const user = await discordBot.users.fetch(item.authorID, false)
-            await user.send(config.FORM_URL + `?uniqueID=${uniqId}`);
+            try {
+                await user.send(config.FORM_URL + `?uniqueID=${uniqId}`);
+            } catch (e) {
+                console.log(`fail to send message to ${uniqId}`);
+            }
             await redisStore.removeFromQueue(`direct_message_item_${uniqId}`)
             await this.sleep(1000);
         }
