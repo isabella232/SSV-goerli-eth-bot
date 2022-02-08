@@ -41,6 +41,7 @@ bot.on('message', async (message) => {
         const status = args[1]
         if(uniqId === 'clean') {
             await redisStore.removeAllItems();
+            await DirectMessage.removeAll();
             return;
         }
         if (!uniqId || (status !== 'true' && status !== 'false')) return;

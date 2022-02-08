@@ -14,6 +14,13 @@ class DirectMessage {
         await redisStore.client.set(`direct_message_item_${userUniqId}`, JSON.stringify(message));
     };
 
+    removeAll = async () => {
+        const itemsList = await redisStore.client.keys(`direct_message_item_*`);
+        for (let i in itemsList) {
+            await redisStore.client.del(i)
+        }
+    };
+
     sendRequests = async () => {
         const itemsList = await redisStore.client.keys(`direct_message_item_*`);
         const batchArray = itemsList.slice(0, 50);
@@ -23,6 +30,7 @@ class DirectMessage {
             const user = await discordBot.users.fetch(item.authorID, false)
             try {
                 await user.send(config.FORM_URL + `?uniqueID=${uniqId}`);
+                console.log('<Send Message>', `message to ${uniqId}`);
             } catch (e) {
                 console.log(`fail to send message to ${uniqId}`);
             }
