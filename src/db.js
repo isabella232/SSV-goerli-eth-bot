@@ -63,6 +63,7 @@ const weeklyLimit = parseFloat(process.env.SSV_WEEKLY_LIMIT) - 1;
 const maxTries = 3;
 
 module.exports = {
+    checkDailyLimit,
     confirmTransaction: async function(discordID, address, topUpAmount){
         //add try catch
         let count = 0
@@ -72,9 +73,6 @@ module.exports = {
                 //console.log("Check account exists address details:",userDetails);
                 //Assumes userDetails will always be an array
 
-                const isUniq = await checkUserUniqueness(discordID, address);
-                if(isUniq.length > 0) return 403;
-
                 if (!userDetails.length) {
                     const userDetails = await setDepositor(discordID, address);
                     await this.updateCounts(userDetails.discordid, topUpAmount);
@@ -82,14 +80,13 @@ module.exports = {
                 }
 
                 userDetails = userDetails[0];
-                if (userDetails.address !== address) {
-                    await updateAddress(discordID, address)
-                    userDetails.address = address
-                }
+
+                const isUniq = await checkUserUniqueness(discordID, address);
+                if(isUniq.length > 0) return 403;
                 //refresh daily limit and weekly limit
                 //check daily limit and weekly limit
                 //If either are reached reject transaction
-                if (!(await checkDailyLimit(userDetails))){
+                if (!(await checkDailyLimit(userDetails.discordid))){
                     return 401;
                 }
                 if (!(await checkWeeklyLimit(userDetails))){
@@ -140,12 +137,6 @@ module.exports = {
     }
 }
 
-async function updateAddress(discordID, address){
-    const query = `update depositortestv2 set address=$1 where discordid=$2`
-    const vals = [String(address), BigInt(discordID)]
-    await pool.query(query, vals);
-}
-
 async function checkUserExists(discordID) {
     const select = `
         SELECT * FROM depositortestv2
@@ -156,7 +147,7 @@ async function checkUserExists(discordID) {
     return result.rows;
 }
 
-async function checkUserUniqueness(discordID, address){
+async function checkUserUniqueness(discordID, address) {
     const select = `
         SELECT * FROM txlogsv2
         WHERE (discord_id = $1 AND address != $2) OR (address = $2 AND discord_id != $1)
@@ -185,26 +176,26 @@ async function setDepositor(discordID, address) {
     };
 }
 
-async function checkDailyLimit(userDetails){
-    const dailycount = await resetDailyCount(userDetails);
-    console.log("Latest dailycount:",dailycount);
-    return dailycount <= dailyLimit;
+function msToTime(ms) {
+    return (ms / (1000 * 60 * 60)).toFixed(1);
 }
 
-async function resetDailyCount(userDetails){
-    const now = new Date();
-    // console.log(userDetails);
-    const discordID = BigInt(userDetails.discordid);
-    const dailytime = userDetails.dailytime;
-    if ((Math.floor(now.getTime()/1000 - Math.floor(dailytime.getTime()/1000))) > 86400){
-        //update
-        console.log('Resetting Daily...');
-        const update = 'update depositortestv2 set dailycount=0,dailytime=$1 where discordid= $2 returning dailycount'
-        const values = [now, discordID]
-        const dailycount = await pool.query(update,values);
-        return dailycount.rows[0].dailycount; //daily limit has been reset
-    }
-    return userDetails.dailycount;
+
+async function checkDailyLimit(discordID) {
+    const select = `
+        SELECT * FROM txlogsv2 a
+        WHERE (discord_id = $1)
+        ORDER BY (a.created_at) desc
+        `;
+
+    const value = [BigInt(discordID)]
+    const result = await pool.query(select, value);
+    const rows = result.rows;
+    if (rows.length === 0) return true;
+    const dateNow = new Date();
+    const userLastRequest = new Date(result.rows[0].created_at);
+    const hoursPassed = msToTime(dateNow - userLastRequest);
+    return hoursPassed > 24;
 }
 
 async function checkWeeklyLimit(userDetails){
