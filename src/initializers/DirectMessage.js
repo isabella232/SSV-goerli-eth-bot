@@ -25,7 +25,7 @@ class DirectMessage {
                 await user.send(config.FORM_URL + `?uniqueID=${uniqId}`);
             } catch (e) {
                 console.log(e);
-                console.log('<<<<<<<<<<<<<<<<<error>>>>>>>>>>>>>>>>>');;
+                console.log('<<<<<<<<<<<<<<<<<error>>>>>>>>>>>>>>>>>');
             }
             await redisStore.removeFromQueue(`direct_message_item_${uniqId}`)
             await this.sleep(10000);
