@@ -27,7 +27,7 @@ class DirectMessage {
                 console.log(`fail to send message to ${uniqId}`);
             }
             await redisStore.removeFromQueue(`direct_message_item_${uniqId}`)
-            await this.sleep(1000);
+            await this.sleep(10000);
         }
         this.sendRequests();
     };
