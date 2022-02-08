@@ -11,7 +11,7 @@ const config = require('./config/config');
 const goerliBot = require('./goerliBot.js');
 const bot = require('./initializers/DiscordBot');
 const queueHandler = require('./queueHandler.js');
-const DirectMessage = require('./initializers/DirectMessage');
+// const DirectMessage = require('./initializers/DirectMessage');
 const walletSwitcher = require("./initializers/WalletSwitcher");
 
 
@@ -35,18 +35,18 @@ bot.on('ready', async function () {
 })
 
 bot.on('message', async (message) => {
-    if (message.channel.id === config.SHEET_REPLY_CHANNEL) {
-        const args = (message.content.split(/ |\n/)).filter(n => n);
-        const uniqId = args[0]
-        const status = args[1]
-        if(uniqId === 'clean') {
-            await redisStore.removeAllItems();
-            await DirectMessage.removeAll();
-            return;
-        }
-        if (!uniqId || (status !== 'true' && status !== 'false')) return;
-        await redisStore.changeFormSubmitted(uniqId, status === 'true');
-    }
+    // if (message.channel.id === config.SHEET_REPLY_CHANNEL) {
+    //     const args = (message.content.split(/ |\n/)).filter(n => n);
+    //     const uniqId = args[0]
+    //     const status = args[1]
+    //     if(uniqId === 'clean') {
+    //         await redisStore.removeAllItems();
+    //         await DirectMessage.removeAll();
+    //         return;
+    //     }
+    //     if (!uniqId || (status !== 'true' && status !== 'false')) return;
+    //     await redisStore.changeFormSubmitted(uniqId, status === 'true');
+    // }
     try {
         if (message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
@@ -57,7 +57,11 @@ bot.on('message', async (message) => {
         const hexData = args[1];
         let channel = message.channel;
         let textColor = config.COLORS.BLUE;
-        if (address !== 'start' && 0 >= allowedValidatorsAmount  && channelIsOnline) {
+        if (address === 'clean' && adminID.includes(Number(message.author.id))) {
+            await redisStore.removeAllItems();
+            return;
+        }
+        if (address !== 'start' && 0 >= allowedValidatorsAmount && channelIsOnline) {
             const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
@@ -119,7 +123,7 @@ bot.on('message', async (message) => {
                 text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
                 textColor = config.COLORS.BLUE;
                 const userUniqId = crypto.randomBytes(20).toString('hex');
-                await DirectMessage.addToQueue(message, userUniqId);
+                // await DirectMessage.addToQueue(message, userUniqId);
                 await redisStore.addToQueue({
                     message: message,
                     authorId: message.author.id,

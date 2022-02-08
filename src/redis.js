@@ -24,7 +24,7 @@ class Redis {
 
     addToQueue = async (message, address, hexData, uniqId) => {
         const nextIndex = await this.getNextIndex();
-        await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData, uniqId, formSubmitted: false}))
+        await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData, uniqId, formSubmitted: true}))
         await this.setNextIndex(nextIndex);
     };
 
