@@ -1,6 +1,5 @@
 const db = require('./db');
 const Web3 = require('web3');
-const Discord = require('discord.js');
 const abiDecoder = require('abi-decoder');
 const config = require('./config/config');
 require('dotenv').config({path: '../.env'})
@@ -63,7 +62,6 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
     }
 
     try {
-        const embed = new Discord.MessageEmbed();
         const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
         const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
         console.log("Sent to " + message.authorId + " transaction receipt: ", receipt);
@@ -75,8 +73,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
                 if (channel) {
-                    embed.setDescription(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash)).setTimestamp().setColor(config.COLORS.BLUE);
-                    channel.send(embed)
+                    channel.send(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash))
                 }
             } else console.error('<<<<<Tx log failed>>>>>');
         } catch (e) {

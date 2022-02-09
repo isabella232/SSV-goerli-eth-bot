@@ -24,7 +24,7 @@ const config = {
             CONTACT_THE_MODS: '**Error**\nSomething went wrong. If this continues, please contact the mods of this bot by using command: `!mod`',
             INVALID_NUMBER_OF_ARGUMENTS_ADDRESS: `**Error!**\nPlease make sure you used the command properly. To view the BOT guide use: +goerlieth help`,
             REACHED_DAILY_GOERLI_ETH: (authorId) => {return `**Error**\n<@!${authorId}> have reached your daily limit. To view the BOT guide use: +goerlieth help`},
-            END_OF_CYCLE: `**Cycle Ended**\nTo read more about how the Deposit BOT work head here: https://discord.com/channels/936177490752319539/936275762942709800/938475017509957653 **See you in the next cycle!**`,
+            END_OF_CYCLE: `**Cycle Ended** @everyone\n To read more about how the Deposit BOT work head here: https://discord.com/channels/936177490752319539/936275762942709800/938475017509957653 **See you in the next cycle!**`,
         },
         SUCCESS: {
             PROCESSING_TRANSACTION: (authorId) => {return `**Success!** \n<@!${authorId}> Processing Transaction. Check back in a few minutes.`},

@@ -61,13 +61,12 @@ bot.on('message', async (message) => {
             await redisStore.removeAllItems();
             return;
         }
-        if (address !== 'start' && 0 >= allowedValidatorsAmount && channelIsOnline) {
-            const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
+        if (0 >= allowedValidatorsAmount && channelIsOnline) {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
+            const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
             await channel.updateOverwrite(roleId, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
-            embed.setDescription(config.MESSAGES.ERRORS.END_OF_CYCLE).setTimestamp().setColor(config.COLORS.BLUE);
-            await message.lineReply(embed);
+            await message.lineReply(config.MESSAGES.ERRORS.END_OF_CYCLE);
             return;
         }
 
