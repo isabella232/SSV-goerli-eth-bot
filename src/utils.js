@@ -88,10 +88,11 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             }
         }
     } catch (err) {
-        console.log('<<<<<<<<<<<<<<<<<<<<<<<<<calculate new nonce>>>>>>>>>>>>>>>>>>>>>>>>>');
-        console.log(err);
-        const newNone = await getNonce();
-        await sendGoerliEth(address, message, methodAbi, amount, newNone, latestGasPrice);
+        if (err.message.includes('nonce too low')) {
+            console.log('<<<<<<<<<<<<<<<<<<<<<<<<<calculate new nonce>>>>>>>>>>>>>>>>>>>>>>>>>');
+            const newNone = await getNonce();
+            await sendGoerliEth(address, message, methodAbi, amount, newNone, latestGasPrice);
+        }
     }
 }
 
