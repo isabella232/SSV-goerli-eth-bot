@@ -56,7 +56,7 @@ module.exports = {
     }
     if (receiverEligible === 403) {
       //Daily of goerli recieved
-      const m = config.MESSAGES.ERRORS.ADDRESS_IS_NOT_ELIGIBLE;
+      const m = config.MESSAGES.ERRORS.BAD_WALLET(message.author.id);
       if (message) {
         embed.setDescription(m)
             .setTimestamp().setColor(config.COLORS.RED);

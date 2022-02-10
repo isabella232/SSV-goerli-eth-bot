@@ -22,8 +22,7 @@ const COMMAND_PREFIX = '+goerlieth';
 const title = 'SSV Goerli Deposit Bot';
 const adminID = [844110609142513675, 724238721028980756, 876421771400740874, 836513795194355765];
 
-const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(config.COLORS.BLUE)
-    .setDescription(config.MESSAGES.MODE.HELP)
+const EMBEDDED_HELP_MESSAGE = new Discord.MessageEmbed().setTitle(title).setColor(config.COLORS.GRAY)
     .addField("+goerlieth <address> <hex-data>", 'To start you need to register the **wallet address** you used to generate the **hex** and the **hex** itself.')
     .addField("+goerlieth help", 'Help with the bot.')
     .addField("+goerlieth mod", "Ping the admins for help if the **BOT** is malfunctioning (spamming this will result in a **BAN**)")
@@ -83,6 +82,7 @@ bot.on('message', async (message) => {
         if (address === 'help') {
             const attachment = new Discord.MessageAttachment('./src/img.png', 'img.png');
             EMBEDDED_HELP_MESSAGE.attachFiles(attachment).setImage('attachment://img.png');
+            EMBEDDED_HELP_MESSAGE.setDescription(config.MESSAGES.MODE.HELP(message.author.id))
             await message.lineReply(EMBEDDED_HELP_MESSAGE);
         }
 
@@ -90,7 +90,7 @@ bot.on('message', async (message) => {
         if (address === 'mod') text = config.MESSAGES.MODE.MOD;
         if (!address) {
             textColor = config.COLORS.RED;
-            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS;
+            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS(message.author.id);
         }
         if (!hexData && address && web3.utils.isAddress(address)) {
             textColor = config.COLORS.RED;
@@ -98,7 +98,7 @@ bot.on('message', async (message) => {
         }
         if (!hexData && address && web3.utils.isHex(address)){
             textColor = config.COLORS.RED;
-            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS;
+            text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS(message.author.id);
         }
 
         if (address && hexData) {
