@@ -22,7 +22,6 @@ module.exports = {
       const latestGasPrice = await getGasPrice();
       console.log('nonce: ' + nonce);
       console.log('latestGasPrice: ' + latestGasPrice);
-      console.log('<<<<<<<<<<here>>>>>>>>>>')
       await utils.sendGoerliEth(address, message, hexData, 32, nonce, Number(latestGasPrice));
       return true;
     } catch (e) {

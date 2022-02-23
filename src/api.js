@@ -11,9 +11,7 @@ module.exports = {
             await axios.get(url);
             return null
         } catch (e) {
-            console.log(e)
             const data = e.response.data;
-
             const error = config.MESSAGES.ERRORS[data.verification_state.toUpperCase()];
             if(typeof error === 'function') return config.MESSAGES.ERRORS[data.verification_state.toUpperCase()](userId)
             return config.MESSAGES.ERRORS[data.verification_state.toUpperCase()]
@@ -31,7 +29,6 @@ module.exports = {
                 registered_to_ssv: false,
                 wallet_address: address,
             })
-            return null
         } catch (e) {
             console.log('<<<<<<<<<<<<<<<<<<<error>>>>>>>>>>>>>>>>>>>')
             console.log('Create new log failed');

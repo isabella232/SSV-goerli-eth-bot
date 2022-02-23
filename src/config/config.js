@@ -62,9 +62,9 @@ const config = {
             FAUCET_DONT_HAVE_ETH: '"**Operation Unsuccessful** \n The Bot does not have enough Goerli ETH. Please contact the maintainers."',
             CONTACT_THE_MODS: '**Error** \n Something went wrong. \n If this continues, please contact the mods of this bot by using command: \`!mod\`',
             REACHED_DAILY_GOERLI_ETH: (authorId) => {return `**Error!** <@!${authorId}> \n have reached your daily limit. \n To view the BOT guide use: https://discord.com/channels/936177490752319539/936275762942709800/938475017509957653`},
-            BAD_WALLET: (authorId) => {return `**Error** \n <@!${authorId}> You already have another wallet registered. \n To view the BOT guide use: https://discord.com/channels/936177490752319539/936275762942709800/938475017509957653`},
             INVALID_NUMBER_OF_ARGUMENTS_ADDRESS: (authorId) => {return `**Error** \n <@!${authorId}> Please make sure you used the command properly.\n To view the BOT guide use: https://discord.com/channels/936177490752319539/936275762942709800/938475017509957653`},
             END_OF_CYCLE: `**Cycle Ended** @everyone \n To read more about how the Deposit BOT work head here: \n https://discord.com/channels/936177490752319539/936275762942709800/938475017509957653 \n\n **See you in the next cycle!**`,
+            OPERATION_UNSUCCESSFUL: (authorId, txHash) => {return `**Error** <@!${authorId}>  \n Failed to deposit. \n ${txHash ? `\n\n View the transaction on etherscan: https://goerli.etherscan.io/tx/${txHash}` : ''}`},
         },
         SUCCESS: {
             PROCESSING_TRANSACTION: (authorId) => {return `**Success!** \n <@!${authorId}> \n Your request was added to the queue.\n You will be mentioned by the BOT if and when the deposit was made to your validator.`},

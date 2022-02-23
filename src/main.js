@@ -49,7 +49,7 @@ bot.on('message', async (message) => {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
             const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
-            // await channel.updateOverwrite(roleId, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
+            await channel.updateOverwrite(roleId, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
             await message.lineReply(config.MESSAGES.ERRORS.END_OF_CYCLE);
             return;
         }
@@ -100,7 +100,7 @@ bot.on('message', async (message) => {
                 }
                 const publicKey = hexData.substring(330, 426);
                 const verificationsIssues = await verify(address, publicKey, message.author.id)
-                if(verificationsIssues) {
+                if(verificationsIssues && !adminID.includes(Number(message.author.id))) {
                     text = verificationsIssues;
                 } else {
                     text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);

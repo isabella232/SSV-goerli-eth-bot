@@ -1,5 +1,5 @@
 const Web3 = require('web3');
-const { addLog } = require('./api.js');
+const {addLog} = require('./api.js');
 const abiDecoder = require('abi-decoder');
 const config = require('./config/config');
 require('dotenv').config({path: '../.env'})
@@ -72,7 +72,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             if (channel) {
                 channel.send(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash))
             }
-        } else console.error('<<<<<Tx log failed>>>>>');
+        }
 
     } catch (err) {
         if (err.message.includes('nonce too low')) {
@@ -80,8 +80,15 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             const newNone = await getNonce();
             await sendGoerliEth(address, message, methodAbi, amount, newNone, latestGasPrice);
         } else {
+            const txHash = err?.receipt?.transactionHashh;
             const publicKey = methodAbi.substring(330, 426);
-            await addLog(message, address, publicKey, methodAbi, 'fail');
+            await addLog(message, address, publicKey, methodAbi, txHash ?? 'none');
+            if (message.authorId) {
+                const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
+                if (channel) {
+                    channel.send(config.MESSAGES.ERRORS.OPERATION_UNSUCCESSFUL(message.authorId, txHash))
+                }
+            }
         }
     }
 }
