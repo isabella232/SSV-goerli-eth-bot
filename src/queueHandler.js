@@ -9,7 +9,7 @@ class QueueHandler {
 
     executeQueueList = async () => {
         const itemsKeys = await this.redisStore.getQueueItems();
-        if(itemsKeys.length) {
+        if (itemsKeys.length) {
             console.log('item_list: ' + itemsKeys);
         } else {
             console.log('Queue is empty');
@@ -24,12 +24,10 @@ class QueueHandler {
 
         for (let key in itemsKeys) {
             const item = JSON.parse(await this.redisStore.client.get(itemsKeys[key]));
-            console.log(`Running ${(Number(key) + 1)}/${itemsKeys.length} `,item.address);
-            if(item.formSubmitted) {
-                await goerliBot.runGoerliFaucet(item.message, item.address, item.hexData);
-                await this.redisStore.removeFromQueue(itemsKeys[key]);
-                console.log('Delete ' + itemsKeys[key] + ' from redis');
-            }
+            console.log(`Running ${(Number(key) + 1)}/${itemsKeys.length} `, item.address);
+            await goerliBot.runGoerliFaucet(item.message, item.address, item.hexData);
+            await this.redisStore.removeFromQueue(itemsKeys[key]);
+            console.log('Delete ' + itemsKeys[key] + ' from redis');
         }
 
         await this.sleep(5000);

@@ -22,27 +22,11 @@ class Redis {
        await this.client.set('queue_next_index', index);
     };
 
-    addToQueue = async (message, address, hexData, uniqId) => {
+    addToQueue = async (message, address, hexData) => {
         const nextIndex = await this.getNextIndex();
-        await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData, uniqId, formSubmitted: true}))
+        await this.client.set(`queue_item_${nextIndex}`, JSON.stringify({message, address, hexData}))
         await this.setNextIndex(nextIndex);
     };
-
-    changeFormSubmitted = async (uniqId, status) => {
-        const items = await this.getQueueItems();
-        for (let key in items) {
-            const item = JSON.parse(await this.client.get(items[key]));
-            if (item.uniqId === uniqId) {
-                if (status) {
-                    item.formSubmitted = true;
-                    await this.client.set(items[key], JSON.stringify(item));
-                } else {
-                    console.log(`item deleted key: ${items[key]} value: ${item.message.username} `)
-                    await this.client.del(items[key]);
-                }
-            }
-        }
-    }
 
     removeAllItems = async () => {
         const itemsKeys = await this.getQueueItems();

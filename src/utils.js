@@ -1,5 +1,5 @@
-const db = require('./db');
 const Web3 = require('web3');
+const { addLog } = require('./api.js');
 const abiDecoder = require('abi-decoder');
 const config = require('./config/config');
 require('dotenv').config({path: '../.env'})
@@ -64,31 +64,24 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
     try {
         const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
         const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        const publicKey = methodAbi.substring(330, 426);
         console.log("Sent to " + message.authorId + " transaction receipt: ", receipt);
-        try {
-            const decodedHexData = abiDecoder.decodeMethod(methodAbi);
-            const pubKey = decodedHexData.params[0].value;
-            const result = await db.addLog(address, message.authorId, message.username, pubKey, `https://goerli.etherscan.io/tx/${receipt.transactionHash}`, JSON.stringify(decodedHexData))
-            if (result === true) console.log("Tx Logged");
-            if (message.authorId) {
-                const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
-                if (channel) {
-                    channel.send(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash))
-                }
-            } else console.error('<<<<<Tx log failed>>>>>');
-        } catch (e) {
-            console.log("Counld not log transaction.");
+        await addLog(message, address, publicKey, methodAbi, receipt.transactionHash);
+        if (message.authorId) {
             const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
             if (channel) {
-                embed.setDescription(config.MESSAGES.ERRORS.WRONG_HEX(message.authorId)).setTimestamp().setColor(3447003);
-                channel.send(embed)
+                channel.send(config.MESSAGES.SUCCESS.OPERATION_SUCCESSFUL(message.authorId, receipt.transactionHash))
             }
-        }
+        } else console.error('<<<<<Tx log failed>>>>>');
+
     } catch (err) {
         if (err.message.includes('nonce too low')) {
             console.log('<<<<<<<<<<<<<<<<<<<<<<<<<calculate new nonce>>>>>>>>>>>>>>>>>>>>>>>>>');
             const newNone = await getNonce();
             await sendGoerliEth(address, message, methodAbi, amount, newNone, latestGasPrice);
+        } else {
+            const publicKey = methodAbi.substring(330, 426);
+            await addLog(message, address, publicKey, methodAbi, 'fail');
         }
     }
 }

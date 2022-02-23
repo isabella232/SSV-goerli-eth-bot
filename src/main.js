@@ -1,6 +1,5 @@
 require('discord-reply');
 require('dotenv').config();
-require('./db');
 const web3 = require('web3');
 const crypto = require('crypto');
 const utils = require('./utils');
@@ -8,10 +7,10 @@ const redisStore = require('./redis');
 const Logger = require('./logger.js');
 const Discord = require('discord.js');
 const config = require('./config/config');
+const { verify } = require('./api.js');
 const goerliBot = require('./goerliBot.js');
 const bot = require('./initializers/DiscordBot');
 const queueHandler = require('./queueHandler.js');
-// const DirectMessage = require('./initializers/DirectMessage');
 const walletSwitcher = require("./initializers/WalletSwitcher");
 
 
@@ -34,28 +33,14 @@ bot.on('ready', async function () {
 })
 
 bot.on('message', async (message) => {
-    // if (message.channel.id === config.SHEET_REPLY_CHANNEL) {
-    //     const args = (message.content.split(/ |\n/)).filter(n => n);
-    //     const uniqId = args[0]
-    //     const status = args[1]
-    //     if(uniqId === 'clean') {
-    //         await redisStore.removeAllItems();
-    //         await DirectMessage.removeAll();
-    //         return;
-    //     }
-    //     if (!uniqId || (status !== 'true' && status !== 'false')) return;
-    //     await redisStore.changeFormSubmitted(uniqId, status === 'true');
-    // }
     try {
         if (message.channel.id !== config.CHANNEL_ID) return
         if (!message || !message.content || message.content.substring(0, COMMAND_PREFIX.length) !== COMMAND_PREFIX) return;
         let text = '';
-        const embed = new Discord.MessageEmbed()
         const args = (message.content.substring(COMMAND_PREFIX.length).split(/ |\n/)).filter(n => n)
         const address = args[0];
         const hexData = args[1];
         let channel = message.channel;
-        let textColor = config.COLORS.BLUE;
         if (address === 'clean' && adminID.includes(Number(message.author.id))) {
             await redisStore.removeAllItems();
             return;
@@ -64,7 +49,7 @@ bot.on('message', async (message) => {
             console.log('<<<<<<<<<<<close channel>>>>>>>>>>>')
             channelIsOnline = false;
             const roleId = message.guild.roles.cache.filter(role => role.name === 'verified').first()?.id;
-            await channel.updateOverwrite(roleId, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
+            // await channel.updateOverwrite(roleId, {SEND_MESSAGES: false, VIEW_CHANNEL: true});
             await message.lineReply(config.MESSAGES.ERRORS.END_OF_CYCLE);
             return;
         }
@@ -89,15 +74,12 @@ bot.on('message', async (message) => {
         // check user's params
         if (address === 'mod') text = config.MESSAGES.MODE.MOD;
         if (!address) {
-            textColor = config.COLORS.RED;
             text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS(message.author.id);
         }
         if (!hexData && address && web3.utils.isAddress(address)) {
-            textColor = config.COLORS.RED;
             text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_HEX;
         }
         if (!hexData && address && web3.utils.isHex(address)){
-            textColor = config.COLORS.RED;
             text = config.MESSAGES.ERRORS.INVALID_NUMBER_OF_ARGUMENTS_ADDRESS(message.author.id);
         }
 
@@ -112,23 +94,23 @@ bot.on('message', async (message) => {
                 if (!walletIsReady) {
                     console.log("Faucet does not have enough ETH.");
                     if (message) {
-                        embed.setDescription(config.MESSAGES.ERRORS.FAUCET_DONT_HAVE_ETH).setTimestamp().setColor(0xff1100);
-                        await message.lineReply(embed);
+                        await message.lineReply(config.MESSAGES.ERRORS.FAUCET_DONT_HAVE_ETH);
                     }
                     return;
                 }
-                const userEligible = await goerliBot.checkUserEligibility(message, address, withCustomChecks);
-                if (!userEligible) return;
-                text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
-                textColor = config.COLORS.BLUE;
-                const userUniqId = crypto.randomBytes(20).toString('hex');
-                // await DirectMessage.addToQueue(message, userUniqId);
-                await redisStore.addToQueue({
-                    message: message,
-                    authorId: message.author.id,
-                    username: message.author.username,
-                }, address, hexData, userUniqId);
-                allowedValidatorsAmount -= 1;
+                const publicKey = hexData.substring(330, 426);
+                const verificationsIssues = await verify(address, publicKey, message.author.id)
+                if(verificationsIssues) {
+                    text = verificationsIssues;
+                } else {
+                    text = config.MESSAGES.SUCCESS.PROCESSING_TRANSACTION(message.author.id);
+                    await redisStore.addToQueue({
+                        message: message,
+                        authorId: message.author.id,
+                        username: message.author.username,
+                    }, address, hexData);
+                    allowedValidatorsAmount -= 1;
+                }
             } else if (!isAddress) {
                 text = config.MESSAGES.ERRORS.INVALID_ADDRESS;
             } else if (!isHex) {
@@ -140,12 +122,11 @@ bot.on('message', async (message) => {
 
 
         if (text) {
-            embed.setDescription(text).setColor(textColor).setTimestamp();
-            await message.lineReply(embed);
+            await message.lineReply(text);
         }
 
     } catch (e) {
-        Logger.log(e);
+        // Logger.log(e);
         const embed = new Discord.MessageEmbed().setDescription(config.MESSAGES.ERRORS.CONTACT_THE_MODS).setColor(0xff1100).setTimestamp();
         await message.lineReply(embed);
     }
@@ -154,7 +135,8 @@ bot.on('message', async (message) => {
 async function getAmountOfValidatorsAllowed() {
     const itemsInQueue = (await redisStore.getQueueItems()).length
     const addressBalance = Number(await utils.getAddressBalance(walletSwitcher.getWalletAddress()));
-    console.log('Amount of validators able to register: ', Math.floor(addressBalance / 32 - (itemsInQueue * 32)));
+    console.log(`faucet balance: ${addressBalance}`)
+    console.log('Amount of validators able to register: ', Math.floor(addressBalance / 32 - itemsInQueue));
     return Math.floor(addressBalance / 32 - itemsInQueue);
 }
 
