@@ -170,17 +170,17 @@ spec:
                   name: config-secrets
                   key: ssv_max_deposit_amount
 
-            - name: SSV_EXPLORER_URL
-              valueFrom:
-                secretKeyRef:
-                  name: config-secrets
-                  key: ssv_explorer_url
-
             - name: SSV_REDIS_URI
               valueFrom:
                 secretKeyRef:
                   name: config-secrets
                   key: ssv_redis_uri
+
+            - name: SSV_EXPLORER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: config-secrets
+                  key: ssv_explorer_url                    
 
       tolerations:
         - effect: NoSchedule
