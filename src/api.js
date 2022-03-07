@@ -20,14 +20,13 @@ module.exports = {
     addLog: async (message, address, publicKey, hexData, txHash) => {
         try {
             const url = `${SSV_EXPLORER_URL}/api/incentivized_deposits/`
-           await axios.post(url, {
-                ip: 'none',
-                user_id: message.authorId,
-                public_key: publicKey,
-                hex_data: hexData,
+            await axios.post(url, {
                 tx_hash: txHash,
-                registered_to_ssv: false,
+                hex_data: hexData,
+                public_key: publicKey,
                 wallet_address: address,
+                registered_to_ssv: false,
+                user_id: message.authorId,
             })
         } catch (e) {
             console.log('<<<<<<<<<<<<<<<<<<<error>>>>>>>>>>>>>>>>>>>')
