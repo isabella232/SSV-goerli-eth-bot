@@ -80,9 +80,11 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             const newNone = await getNonce();
             await sendGoerliEth(address, message, methodAbi, amount, newNone, latestGasPrice);
         } else {
-            const txHash = err?.receipt?.transactionHashh;
+            console.log('<<<<<<<<<<error>>>>>>>>>>');
+            console.log(err.message);
+            const txHash = err?.receipt?.transactionHash;
             const publicKey = methodAbi.substring(330, 426);
-            await addLog(message, address, publicKey, methodAbi, txHash ?? 'none');
+            await addLog(message, address, publicKey, methodAbi, txHash ?? 'none', true);
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
                 if (channel) {

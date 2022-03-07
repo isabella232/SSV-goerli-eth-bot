@@ -11,16 +11,13 @@ module.exports = {
             await axios.get(url);
             return null
         } catch (e) {
-            console.log('<<<<<<<<<<<<<<<<<<<<<error in verify>>>>>>>>>>>>>>>>>>>>>');
-            console.log(e.message);
-            console.log('<<<<<<<<<<<<<<<<<<<<<error in verify>>>>>>>>>>>>>>>>>>>>>');
             const data = e.response.data;
             const error = config.MESSAGES.ERRORS[data.verification_state.toUpperCase()];
             if(typeof error === 'function') return config.MESSAGES.ERRORS[data.verification_state.toUpperCase()](userId)
             return config.MESSAGES.ERRORS[data.verification_state.toUpperCase()]
         }
     },
-    addLog: async (message, address, publicKey, hexData, txHash) => {
+    addLog: async (message, address, publicKey, hexData, txHash, registerToSsv = false) => {
         try {
             const url = `${SSV_EXPLORER_URL}/api/incentivized_deposits/`
             await axios.post(url, {
@@ -28,8 +25,8 @@ module.exports = {
                 hex_data: hexData,
                 public_key: publicKey,
                 wallet_address: address,
-                registered_to_ssv: false,
                 user_id: message.authorId,
+                registered_to_ssv: registerToSsv,
             })
         } catch (e) {
             console.log('<<<<<<<<<<<<<<<<<<<error in create log>>>>>>>>>>>>>>>>>>>')
