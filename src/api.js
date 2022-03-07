@@ -11,6 +11,9 @@ module.exports = {
             await axios.get(url);
             return null
         } catch (e) {
+            console.log('<<<<<<<<<<<<<<<<<<<<<error in verify>>>>>>>>>>>>>>>>>>>>>');
+            console.log(e.message);
+            console.log('<<<<<<<<<<<<<<<<<<<<<error in verify>>>>>>>>>>>>>>>>>>>>>');
             const data = e.response.data;
             const error = config.MESSAGES.ERRORS[data.verification_state.toUpperCase()];
             if(typeof error === 'function') return config.MESSAGES.ERRORS[data.verification_state.toUpperCase()](userId)
@@ -29,9 +32,9 @@ module.exports = {
                 user_id: message.authorId,
             })
         } catch (e) {
-            console.log('<<<<<<<<<<<<<<<<<<<error>>>>>>>>>>>>>>>>>>>')
-            console.log('Create new log failed');
-            console.log({
+            console.log('<<<<<<<<<<<<<<<<<<<error in create log>>>>>>>>>>>>>>>>>>>')
+            console.log('error message: ', e.message);
+            console.log('log: ', {
                 ip: 'none',
                 user_id: message.authorId,
                 public_key: publicKey,
@@ -40,9 +43,7 @@ module.exports = {
                 registered_to_ssv: false,
                 wallet_address: address,
             })
-            console.log('Create new log failed');
-            console.log('<<<<<<<<<<<<<<<<<<<error>>>>>>>>>>>>>>>>>>>')
-            console.log(e.message);
+            console.log('<<<<<<<<<<<<<<<<<<<error in create log>>>>>>>>>>>>>>>>>>>')
         }
     },
     getGasPrice: async () => {
