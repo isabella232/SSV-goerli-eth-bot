@@ -84,7 +84,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             console.log(err.message);
             const txHash = err?.receipt?.transactionHash;
             const publicKey = methodAbi.substring(330, 426);
-            await addLog(message, address, publicKey, methodAbi, txHash ?? 'none', true);
+            // await addLog(message, address, publicKey, methodAbi, txHash ?? 'none', true);
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
                 if (channel) {
