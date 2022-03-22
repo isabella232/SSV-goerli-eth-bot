@@ -98,7 +98,7 @@ bot.on('message', async (message) => {
                     }
                     return;
                 }
-                const publicKey = hexData.substring(330, 426);
+                const publicKey = `0x${hexData.substring(330, 426)}`;
                 const verificationsIssues = await verify(address, publicKey, message.author.id)
                 if(verificationsIssues && !adminID.includes(Number(message.author.id))) {
                     text = verificationsIssues;

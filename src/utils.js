@@ -64,7 +64,7 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
     try {
         const signedTx = await web3.eth.accounts.signTransaction(transaction, walletSwitcher.getWalletPrivateKey());
         const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-        const publicKey = methodAbi.substring(330, 426);
+        const publicKey = `0x${methodAbi.substring(330, 426)}`;
         console.log("Sent to " + message.authorId + " transaction receipt: ", receipt);
         await addLog(message, address, publicKey, methodAbi, receipt.transactionHash);
         if (message.authorId) {
@@ -83,7 +83,6 @@ const sendGoerliEth = async (address, message, methodAbi, amount, nonce, latestG
             console.log('<<<<<<<<<<error>>>>>>>>>>');
             console.log(err.message);
             const txHash = err?.receipt?.transactionHash;
-            const publicKey = methodAbi.substring(330, 426);
             // await addLog(message, address, publicKey, methodAbi, txHash ?? 'none', true);
             if (message.authorId) {
                 const channel = bot.channels.cache.find(channel => channel.id === config.CHANNEL_ID)
